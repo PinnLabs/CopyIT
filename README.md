@@ -26,7 +26,7 @@ brew install --cask copyit
 
 ### Manual download
 
-1. Grab the latest `CopyIT-x.y.z.zip` from [Releases](https://github.com/PinnLabs/copyit/releases).
+1. Grab the latest `CopyIT-x.y.z.zip` from [Releases](https://github.com/PinnLabs/CopyIT/releases).
 2. Unzip and drag `ClipboardManager.app` to `/Applications`.
 3. First launch — right-click → **Open** to bypass Gatekeeper (the app is ad-hoc signed), or run:
 
