@@ -1,0 +1,83 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version (without v prefix, e.g. 1.0.0)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-14
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "value=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            ref="${{ github.ref_name }}"
+            echo "value=${ref#v}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer || sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate project
+        run: xcodegen generate
+
+      - name: Build Release
+        run: make archive zip sha VERSION=${{ steps.version.outputs.value }}
+
+      - name: Read SHA256
+        id: sha
+        run: |
+          sha=$(cat dist/CopyIT-${{ steps.version.outputs.value }}.zip.sha256)
+          echo "value=$sha" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name != '' && github.ref_name || format('v{0}', steps.version.outputs.value) }}
+          name: CopyIT v${{ steps.version.outputs.value }}
+          generate_release_notes: true
+          body: |
+            ## Install via Homebrew
+
+            ```sh
+            brew tap PinnLabs/tap
+            brew install --cask copyit
+            ```
+
+            ## Manual install
+
+            1. Download `CopyIT-${{ steps.version.outputs.value }}.zip` below
+            2. Unzip and drag `ClipboardManager.app` to `/Applications`
+            3. First launch: right-click → Open (Gatekeeper bypass) — or run:
+               `xattr -dr com.apple.quarantine /Applications/ClipboardManager.app`
+
+            ## Cask formula update
+
+            Paste into `PinnLabs/homebrew-tap` → `Casks/copyit.rb`:
+
+            ```ruby
+            version "${{ steps.version.outputs.value }}"
+            sha256 "${{ steps.sha.outputs.value }}"
+            ```
+          files: |
+            dist/CopyIT-${{ steps.version.outputs.value }}.zip
+            dist/CopyIT-${{ steps.version.outputs.value }}.zip.sha256

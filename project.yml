@@ -1,0 +1,76 @@
+name: ClipboardManager
+options:
+  bundleIdPrefix: com.copyit
+  deploymentTarget:
+    macOS: "14.0"
+  developmentLanguage: en
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    SWIFT_TREAT_WARNINGS_AS_ERRORS: NO
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    DEAD_CODE_STRIPPING: YES
+
+targets:
+  ClipboardManager:
+    type: application
+    platform: macOS
+    sources:
+      - path: ClipboardManager
+        excludes:
+          - "Resources/**"
+    resources:
+      - path: ClipboardManager/Resources/Assets.xcassets
+    info:
+      path: ClipboardManager/Resources/Info.plist
+      properties:
+        LSUIElement: true
+        LSMinimumSystemVersion: "14.0"
+        CFBundleShortVersionString: "1.0.0"
+        CFBundleVersion: "1"
+        NSAppleEventsUsageDescription: "ClipboardManager needs accessibility access to register global hotkeys."
+        NSHumanReadableCopyright: "Copyright © 2026 CopyIT. MIT License."
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.copyit.ClipboardManager
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_IDENTITY: "-"
+        ENABLE_HARDENED_RUNTIME: YES
+        COMBINE_HIDPI_IMAGES: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        CODE_SIGN_ENTITLEMENTS: ClipboardManager/Resources/ClipboardManager.entitlements
+
+  ClipboardManagerTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests
+    dependencies:
+      - target: ClipboardManager
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.copyit.ClipboardManagerTests
+        GENERATE_INFOPLIST_FILE: YES
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/ClipboardManager.app/Contents/MacOS/ClipboardManager"
+
+schemes:
+  ClipboardManager:
+    build:
+      targets:
+        ClipboardManager: all
+        ClipboardManagerTests: [test]
+    test:
+      targets:
+        - ClipboardManagerTests
+      gatherCoverageData: true
+    run:
+      config: Debug
+    archive:
+      config: Release
