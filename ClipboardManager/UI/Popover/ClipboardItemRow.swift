@@ -48,11 +48,8 @@ struct ClipboardItemRow: View {
     @ViewBuilder
     private var itemPreview: some View {
         if item.type == .image,
-           let data = item.imageData,
-           let image = NSImage(data: data) {
-            Image(nsImage: image)
-                .resizable()
-                .scaledToFit()
+           let thumbnailURL = item.thumbnailFileURL {
+            ThumbnailImageView(fileURL: thumbnailURL)
                 .frame(width: 40, height: 32)
                 .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
         } else {
@@ -75,5 +72,44 @@ struct ClipboardItemRow: View {
         case .image: return "photo"
         case .unknown: return "questionmark.square"
         }
+    }
+}
+
+private struct ThumbnailImageView: NSViewRepresentable {
+    private static let cache = NSCache<NSURL, NSImage>()
+
+    let fileURL: URL
+
+    func makeNSView(context: Context) -> NSImageView {
+        let imageView = NSImageView()
+        imageView.imageScaling = .scaleProportionallyUpOrDown
+        updateImage(in: imageView, context: context)
+        return imageView
+    }
+
+    func updateNSView(_ imageView: NSImageView, context: Context) {
+        guard context.coordinator.loadedURL != fileURL else { return }
+        updateImage(in: imageView, context: context)
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+
+    private func updateImage(in imageView: NSImageView, context: Context) {
+        let cacheKey = fileURL as NSURL
+        if let cachedImage = Self.cache.object(forKey: cacheKey) {
+            imageView.image = cachedImage
+        } else if let thumbnail = NSImage(contentsOf: fileURL) {
+            Self.cache.setObject(thumbnail, forKey: cacheKey)
+            imageView.image = thumbnail
+        } else {
+            imageView.image = nil
+        }
+        context.coordinator.loadedURL = fileURL
+    }
+
+    final class Coordinator {
+        var loadedURL: URL?
     }
 }

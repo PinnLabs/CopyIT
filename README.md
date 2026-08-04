@@ -13,7 +13,7 @@ Native macOS menu bar clipboard manager. Open source, MIT-licensed.
 - Global hotkey `⌥Space` to toggle the popover from anywhere.
 - Right-click the status bar icon for quick actions (Open, Clear, Quit).
 - Launches at login (`SMAppService`).
-- Persists history across sessions (`UserDefaults`).
+- Persists history metadata in `UserDefaults` and image payloads in Application Support.
 
 ## Install
 

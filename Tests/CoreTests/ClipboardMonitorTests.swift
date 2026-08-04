@@ -24,15 +24,16 @@ final class ClipboardMonitorTests: XCTestCase {
         XCTAssertEqual(item.type, .unknown)
     }
 
-    func test_imageItemFactory_preservesImagePayload() {
+    func test_imageCapture_preservesImagePayload() {
         let data = Data([0x89, 0x50, 0x4E, 0x47])
-        let item = ClipboardItem.from(
-            imageData: data,
+        let capture = ClipboardCapture.image(
+            data: data,
             pasteboardType: NSPasteboard.PasteboardType.png.rawValue
         )
 
-        XCTAssertEqual(item.type, .image)
-        XCTAssertEqual(item.imageData, data)
-        XCTAssertEqual(item.imagePasteboardType, NSPasteboard.PasteboardType.png.rawValue)
+        XCTAssertEqual(
+            capture,
+            .image(data: data, pasteboardType: NSPasteboard.PasteboardType.png.rawValue)
+        )
     }
 }
