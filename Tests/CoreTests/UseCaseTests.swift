@@ -1,4 +1,5 @@
 import XCTest
+import AppKit
 @testable import ClipboardManager
 
 final class UseCaseTests: XCTestCase {
@@ -37,5 +38,30 @@ final class UseCaseTests: XCTestCase {
         sut.execute()
         XCTAssertTrue(store.clearCalled)
         XCTAssertTrue(store.savedItems.isEmpty)
+    }
+
+    func test_copyItem_writesPersistedImageBackToPasteboard() throws {
+        let pasteboard = NSPasteboard(name: NSPasteboard.Name(UUID().uuidString))
+        let data = Data([1, 2, 3])
+        let imageDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("CopyItemUseCaseTests-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: imageDirectory) }
+        let imageFileStore = ImageFileStore(directoryURL: imageDirectory)
+        let stored = try XCTUnwrap(imageFileStore.store(data: data, pasteboardType: "public.png"))
+        let item = ClipboardItem(
+            content: "Image",
+            type: .image,
+            imagePasteboardType: NSPasteboard.PasteboardType.png.rawValue
+        ).storedImage(
+            imageFileName: stored.imageFileName,
+            imageDigest: stored.digest,
+            thumbnailFileName: stored.thumbnailFileName,
+            thumbnailFileURL: nil
+        )
+        let sut = CopyItemUseCase(pasteboard: pasteboard, imageFileStore: imageFileStore)
+
+        sut.execute(item: item)
+
+        XCTAssertEqual(pasteboard.data(forType: .png), data)
     }
 }

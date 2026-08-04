@@ -1,4 +1,5 @@
 import XCTest
+import AppKit
 @testable import ClipboardManager
 
 final class ClipboardMonitorTests: XCTestCase {
@@ -21,5 +22,18 @@ final class ClipboardMonitorTests: XCTestCase {
     func test_itemFactory_returnsUnknownForEmptyString() {
         let item = ClipboardItem.from(pasteboardString: "   ")
         XCTAssertEqual(item.type, .unknown)
+    }
+
+    func test_imageCapture_preservesImagePayload() {
+        let data = Data([0x89, 0x50, 0x4E, 0x47])
+        let capture = ClipboardCapture.image(
+            data: data,
+            pasteboardType: NSPasteboard.PasteboardType.png.rawValue
+        )
+
+        XCTAssertEqual(
+            capture,
+            .image(data: data, pasteboardType: NSPasteboard.PasteboardType.png.rawValue)
+        )
     }
 }
