@@ -14,7 +14,7 @@ final class UserDefaultsStore: ClipboardStoring {
 
     func save(_ item: ClipboardItem) {
         var current = fetchAll()
-        current.removeAll { $0.content == item.content }
+        current.removeAll { $0.hasSamePayload(as: item) }
         current.insert(item, at: 0)
         if current.count > Self.maxHistoryCount {
             current = Array(current.prefix(Self.maxHistoryCount))

@@ -7,7 +7,7 @@ Native macOS menu bar clipboard manager. Open source, MIT-licensed.
 ## Features (v1.0)
 
 - Lives in the menu bar — no Dock icon, no `⌘Tab` clutter (`LSUIElement`).
-- Tracks the last 50 clipboard entries (text + URLs).
+- Tracks the last 50 clipboard entries (text, URLs, and images).
 - Search with live filtering, case-insensitive.
 - Keyboard navigation: arrows to move, `↩` to copy, `⌫` to delete, `esc` to close.
 - Global hotkey `⌥Space` to toggle the popover from anywhere.

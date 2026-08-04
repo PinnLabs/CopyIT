@@ -46,6 +46,26 @@ final class ClipboardStoreTests: XCTestCase {
         XCTAssertEqual(sut.fetchAll().count, 1)
     }
 
+    func test_saveAndFetch_preservesImageData() {
+        let data = Data([1, 2, 3, 4])
+        let item = ClipboardItem.from(imageData: data, pasteboardType: "public.png")
+
+        sut.save(item)
+
+        XCTAssertEqual(sut.fetchAll().first?.imageData, data)
+        XCTAssertEqual(sut.fetchAll().first?.type, .image)
+    }
+
+    func test_save_dedupesImagesByDataInsteadOfDisplayLabel() {
+        sut.save(ClipboardItem.from(imageData: Data([1]), pasteboardType: "public.png"))
+        sut.save(ClipboardItem.from(imageData: Data([2]), pasteboardType: "public.png"))
+        sut.save(ClipboardItem.from(imageData: Data([1]), pasteboardType: "public.png"))
+
+        let items = sut.fetchAll()
+        XCTAssertEqual(items.count, 2)
+        XCTAssertEqual(items.first?.imageData, Data([1]))
+    }
+
     func test_save_capsAt50Items() {
         for index in 0..<60 {
             sut.save(ClipboardItem(content: "item-\(index)", type: .text))

@@ -1,4 +1,5 @@
 import XCTest
+import AppKit
 @testable import ClipboardManager
 
 final class UseCaseTests: XCTestCase {
@@ -37,5 +38,19 @@ final class UseCaseTests: XCTestCase {
         sut.execute()
         XCTAssertTrue(store.clearCalled)
         XCTAssertTrue(store.savedItems.isEmpty)
+    }
+
+    func test_copyItem_writesImageBackToPasteboard() throws {
+        let pasteboard = NSPasteboard(name: NSPasteboard.Name(UUID().uuidString))
+        let data = Data([1, 2, 3])
+        let item = ClipboardItem.from(
+            imageData: data,
+            pasteboardType: NSPasteboard.PasteboardType.png.rawValue
+        )
+        let sut = CopyItemUseCase(pasteboard: pasteboard)
+
+        sut.execute(item: item)
+
+        XCTAssertEqual(pasteboard.data(forType: .png), data)
     }
 }

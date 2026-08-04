@@ -10,6 +10,12 @@ final class CopyItemUseCase {
 
     func execute(item: ClipboardItem) {
         pasteboard.clearContents()
-        pasteboard.setString(item.content, forType: .string)
+        if item.type == .image,
+           let data = item.imageData,
+           let rawType = item.imagePasteboardType {
+            pasteboard.setData(data, forType: NSPasteboard.PasteboardType(rawType))
+        } else {
+            pasteboard.setString(item.content, forType: .string)
+        }
     }
 }

@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct ClipboardItemRow: View {
@@ -11,9 +12,7 @@ struct ClipboardItemRow: View {
     var body: some View {
         Button(action: onCopy) {
             HStack(spacing: 10) {
-                Image(systemName: iconName)
-                    .foregroundStyle(.secondary)
-                    .frame(width: 16)
+                itemPreview
                 VStack(alignment: .leading, spacing: 2) {
                     Text(item.content)
                         .lineLimit(1)
@@ -46,6 +45,23 @@ struct ClipboardItemRow: View {
         }
     }
 
+    @ViewBuilder
+    private var itemPreview: some View {
+        if item.type == .image,
+           let data = item.imageData,
+           let image = NSImage(data: data) {
+            Image(nsImage: image)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 40, height: 32)
+                .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+        } else {
+            Image(systemName: iconName)
+                .foregroundStyle(.secondary)
+                .frame(width: 16)
+        }
+    }
+
     private var backgroundColor: Color {
         if isSelected { return Color.accentColor.opacity(0.22) }
         if isHovering { return Color.accentColor.opacity(0.12) }
@@ -56,6 +72,7 @@ struct ClipboardItemRow: View {
         switch item.type {
         case .text: return "doc.text"
         case .url: return "link"
+        case .image: return "photo"
         case .unknown: return "questionmark.square"
         }
     }

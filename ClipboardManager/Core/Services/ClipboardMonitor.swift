@@ -1,8 +1,9 @@
 import AppKit
 import Foundation
+import UniformTypeIdentifiers
 
 final class ClipboardMonitor: ClipboardMonitoring {
-    var onNewItem: ((String) -> Void)?
+    var onNewItem: ((ClipboardItem) -> Void)?
 
     private let pollInterval: TimeInterval
     private let pasteboard: NSPasteboard
@@ -36,9 +37,29 @@ final class ClipboardMonitor: ClipboardMonitoring {
         let current = pasteboard.changeCount
         guard current != lastChangeCount else { return }
         lastChangeCount = current
+
+        if let imageItem = makeImageItem() {
+            onNewItem?(imageItem)
+            return
+        }
+
         guard let string = pasteboard.string(forType: .string) else { return }
         let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
-        onNewItem?(string)
+        onNewItem?(ClipboardItem.from(pasteboardString: string))
+    }
+
+    private func makeImageItem() -> ClipboardItem? {
+        let preferredTypes: [NSPasteboard.PasteboardType] = [.png, .tiff]
+        let otherImageTypes = (pasteboard.types ?? []).filter { type in
+            !preferredTypes.contains(type) && UTType(type.rawValue)?.conforms(to: .image) == true
+        }
+
+        for type in preferredTypes + otherImageTypes {
+            if let data = pasteboard.data(forType: type), !data.isEmpty {
+                return ClipboardItem.from(imageData: data, pasteboardType: type.rawValue)
+            }
+        }
+        return nil
     }
 }

@@ -24,8 +24,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let statusBar = StatusBarController(viewModel: viewModel)
 
-        monitor.onNewItem = { [weak viewModel] raw in
-            let item = ClipboardItem.from(pasteboardString: raw)
+        monitor.onNewItem = { [weak viewModel] item in
             store.save(item)
             Task { @MainActor in viewModel?.refresh() }
         }
