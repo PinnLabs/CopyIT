@@ -1,6 +1,6 @@
 # CopyIT — ClipboardManager
 
-<img width="1024" height="658" alt="image" src="https://github.com/user-attachments/assets/6341bc89-2fdd-4f9f-8dda-7046f842324a" />
+<video src=".github/assets/demo.mp4" controls width="1024"></video>
 
 Native macOS menu bar clipboard manager. Open source, MIT-licensed.
 
