@@ -7,7 +7,7 @@ cask "copyit" do
   desc "Native macOS menu bar clipboard manager"
   homepage "https://github.com/PinnLabs/CopyIT"
 
-  depends_on macos: ">= :sonoma"
+  depends_on macos: :sonoma
 
   app "ClipboardManager.app"
 
