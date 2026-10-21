@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pause capture from the menu bar (15 minutes, 1 hour, or until resumed).
 - Settings window with launch at login and history size (25 to 200 items).
 - Issue and PR templates, security policy and code of conduct.
+- Edit the ignored apps list in Settings → Privacy.
+- Automatically delete items older than 1, 7, 30 or 90 days.
+- Optionally clear the history when quitting CopyIT.
 
 ### Changed
 
