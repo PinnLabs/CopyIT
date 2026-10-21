@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-10-21
+
 ### Added
 
 - App icon, menu bar icon and brand assets.
@@ -52,6 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Search with live filtering, keyboard navigation, global hotkey (`⌥Space`).
 - Launch at login support.
 
-[Unreleased]: https://github.com/PinnLabs/CopyIT/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/PinnLabs/CopyIT/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/PinnLabs/CopyIT/compare/v1.1.0...v1.2.1
 [1.1.0]: https://github.com/PinnLabs/CopyIT/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/PinnLabs/CopyIT/releases/tag/v1.0.0
