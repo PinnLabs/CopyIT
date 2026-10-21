@@ -20,24 +20,49 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let store: ClipboardStoring = UserDefaultsStore(imageFileStore: imageFileStore, preferences: preferences)
         let ignoredApps: IgnoredAppsProviding = UserDefaultsIgnoredApps()
         let monitor: ClipboardMonitoring = ClipboardMonitor(ignoredApps: ignoredApps)
-        let hotkey: HotkeyRegistering = HotkeyManager()
         let launchAtLogin: LaunchAtLoginManaging = LaunchAtLoginService()
-        let shutdownCoordinator = ShutdownCoordinator(
-            preferences: preferences,
-            clearHistoryUseCase: ClearHistoryUseCase(store: store)
-        )
+        let shutdownCoordinator = ShutdownCoordinator(preferences: preferences, clearHistoryUseCase: ClearHistoryUseCase(store: store))
         shutdownCoordinator.handleLaunch()
         let pruneExpiredItems = PruneExpiredItemsUseCase(store: store, preferences: preferences)
-        pruneExpiredItems.execute()
 
-        let viewModel = PopoverViewModel(
-            fetchUseCase: FetchHistoryUseCase(store: store),
-            copyUseCase: CopyItemUseCase(imageFileStore: imageFileStore),
-            deleteUseCase: DeleteItemUseCase(store: store),
-            clearUseCase: ClearHistoryUseCase(store: store)
+        let viewModel = Self.makePopoverViewModel(store: store, imageFileStore: imageFileStore)
+
+        let settingsWindow = Self.makeSettingsWindow(
+            store: store, preferences: preferences, ignoredApps: ignoredApps,
+            launchAtLogin: launchAtLogin, pruneExpiredItems: pruneExpiredItems
         )
+        let statusBar = StatusBarController(
+            viewModel: viewModel,
+            monitor: monitor,
+            onOpenSettings: { [weak settingsWindow] in settingsWindow?.show() },
+            onWillShowPopover: { pruneExpiredItems.execute() }
+        )
+        startPruning(pruneExpiredItems, viewModel: viewModel)
 
-        let settingsWindow = SettingsWindowController(
+        startCapture(monitor: monitor, store: store, imageFileStore: imageFileStore, viewModel: viewModel)
+
+        startHotkey(statusBar: statusBar)
+
+        // Launch at login is opt-in from Settings. Existing users stay registered: SMAppService keeps the
+        // registration across launches, and nothing here calls disable().
+        self.store = store
+        self.monitor = monitor
+        self.statusBar = statusBar
+        self.launchAtLogin = launchAtLogin
+        self.settingsWindow = settingsWindow
+        self.shutdownCoordinator = shutdownCoordinator
+    }
+
+    // MARK: - Composition helpers
+
+    private static func makeSettingsWindow(
+        store: ClipboardStoring,
+        preferences: PreferencesStoring,
+        ignoredApps: IgnoredAppsProviding,
+        launchAtLogin: LaunchAtLoginManaging,
+        pruneExpiredItems: PruneExpiredItemsUseCase
+    ) -> SettingsWindowController {
+        SettingsWindowController(
             viewModel: SettingsViewModel(
                 preferences: preferences,
                 launchAtLogin: launchAtLogin,
@@ -50,17 +75,41 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 pruneExpiredItemsUseCase: pruneExpiredItems
             )
         )
-        let statusBar = StatusBarController(
-            viewModel: viewModel,
-            monitor: monitor,
-            onOpenSettings: { [weak settingsWindow] in settingsWindow?.show() },
-            onWillShowPopover: { pruneExpiredItems.execute() }
+    }
+
+    private static func makePopoverViewModel(store: ClipboardStoring, imageFileStore: ImageFileStore) -> PopoverViewModel {
+        PopoverViewModel(
+            fetchUseCase: FetchHistoryUseCase(store: store),
+            copyUseCase: CopyItemUseCase(imageFileStore: imageFileStore),
+            deleteUseCase: DeleteItemUseCase(store: store),
+            clearUseCase: ClearHistoryUseCase(store: store)
         )
+    }
+
+    /// Prunes now, then every hour.
+    private func startPruning(_ pruneExpiredItems: PruneExpiredItemsUseCase, viewModel: PopoverViewModel) {
+        pruneExpiredItems.execute()
         pruneTimer = Timer.scheduledTimer(withTimeInterval: Self.pruneInterval, repeats: true) { [weak viewModel] _ in
             pruneExpiredItems.execute()
             Task { @MainActor in viewModel?.refresh() }
         }
+    }
 
+    private func startHotkey(statusBar: StatusBarController) {
+        let hotkey: HotkeyRegistering = HotkeyManager()
+        self.hotkey = hotkey
+        hotkey.onHotkeyTriggered = { [weak statusBar] in
+            Task { @MainActor in statusBar?.togglePopover() }
+        }
+        hotkey.register()
+    }
+
+    private func startCapture(
+        monitor: ClipboardMonitoring,
+        store: ClipboardStoring,
+        imageFileStore: ImageFileStore,
+        viewModel: PopoverViewModel
+    ) {
         let ingestion: ClipboardIngesting = ImageIngestionService(imageFileStore: imageFileStore)
         monitor.onNewItem = { [weak viewModel] capture in
             ingestion.ingest(capture) { item in
@@ -69,21 +118,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
         monitor.startMonitoring()
-
-        hotkey.onHotkeyTriggered = { [weak statusBar] in
-            Task { @MainActor in statusBar?.togglePopover() }
-        }
-        hotkey.register()
-
-        // Launch at login is opt-in from Settings. Existing users stay registered: SMAppService keeps the
-        // registration across launches, and nothing here calls disable().
-        self.store = store
-        self.monitor = monitor
-        self.hotkey = hotkey
-        self.statusBar = statusBar
-        self.launchAtLogin = launchAtLogin
-        self.settingsWindow = settingsWindow
-        self.shutdownCoordinator = shutdownCoordinator
     }
 
     func openSettings() {

@@ -70,9 +70,9 @@ final class PopoverViewModelTests: XCTestCase {
     }
 
     func test_deleteSelected_removesSelected() {
-        let a = ClipboardItem(content: "a", type: .text)
-        let b = ClipboardItem(content: "b", type: .text)
-        store.savedItems = [a, b]
+        let first = ClipboardItem(content: "a", type: .text)
+        let second = ClipboardItem(content: "b", type: .text)
+        store.savedItems = [first, second]
         sut.refresh()
         sut.moveSelection(by: 1)
         sut.deleteSelected()
@@ -81,13 +81,13 @@ final class PopoverViewModelTests: XCTestCase {
     }
 
     func test_isSelected_tracksSelectedItem() {
-        let a = ClipboardItem(content: "a", type: .text)
-        let b = ClipboardItem(content: "b", type: .text)
-        store.savedItems = [a, b]
+        let first = ClipboardItem(content: "a", type: .text)
+        let second = ClipboardItem(content: "b", type: .text)
+        store.savedItems = [first, second]
         sut.refresh()
-        XCTAssertTrue(sut.isSelected(a))
+        XCTAssertTrue(sut.isSelected(first))
         sut.moveSelection(by: 1)
-        XCTAssertTrue(sut.isSelected(b))
+        XCTAssertTrue(sut.isSelected(second))
     }
 
     func test_escape_withSearchText_clearsSearchInsteadOfClosing() {

@@ -119,7 +119,8 @@ final class ImageFileStore: @unchecked Sendable {
     }
 
     private static func defaultDirectoryURL(fileManager: FileManager) -> URL {
-        let applicationSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        let applicationSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+            ?? fileManager.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support", isDirectory: true)
         return applicationSupport
             .appendingPathComponent("CopyIT", isDirectory: true)
             .appendingPathComponent("ClipboardImages", isDirectory: true)

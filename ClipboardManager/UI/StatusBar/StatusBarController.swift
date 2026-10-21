@@ -39,7 +39,11 @@ final class StatusBarController: NSObject {
     }
 
     func togglePopover() {
-        popover.isShown ? closePopover() : showPopover()
+        if popover.isShown {
+            closePopover()
+        } else {
+            showPopover()
+        }
     }
 
     private func configurePopover() {
