@@ -44,14 +44,16 @@ final class ClipboardMonitorTests: XCTestCase {
 
     private func makeSUT(
         frontmost: String? = nil,
-        ignored: [String] = []
+        ignored: [String] = [],
+        now: @escaping () -> Date = Date.init
     ) -> (ClipboardMonitor, NSPasteboard, () -> [ClipboardCapture]) {
         let pasteboard = NSPasteboard.withUniqueName()
         addTeardownBlock { pasteboard.releaseGlobally() }
         let sut = ClipboardMonitor(
             pasteboard: pasteboard,
             ignoredApps: MockIgnoredApps(bundleIdentifiers: ignored),
-            frontmostApp: MockFrontmostApp(frontmostBundleIdentifier: frontmost)
+            frontmostApp: MockFrontmostApp(frontmostBundleIdentifier: frontmost),
+            now: now
         )
         var captures: [ClipboardCapture] = []
         sut.onNewItem = { captures.append($0) }
@@ -123,6 +125,48 @@ final class ClipboardMonitorTests: XCTestCase {
 
     func test_noFrontmostApp_doesNotBlockCapture() {
         let (sut, pasteboard, captures) = makeSUT(frontmost: nil, ignored: ["com.bitwarden.desktop"])
+        write("hello", markedAs: nil, to: pasteboard)
+        sut.checkForClipboardChanges()
+        XCTAssertEqual(captures(), [.text("hello")])
+    }
+
+    // MARK: - Pause
+
+    func test_whilePaused_itemIsIgnored() {
+        let (sut, pasteboard, captures) = makeSUT()
+        sut.pause(until: nil)
+        write("hello", markedAs: nil, to: pasteboard)
+        sut.checkForClipboardChanges()
+        XCTAssertTrue(sut.isPaused)
+        XCTAssertTrue(captures().isEmpty)
+    }
+
+    func test_pauseUntilDate_expiresAndCapturesNextItem() {
+        var clock = Date(timeIntervalSince1970: 0)
+        let (sut, pasteboard, captures) = makeSUT(now: { clock })
+        sut.pause(until: clock.addingTimeInterval(60))
+        clock = clock.addingTimeInterval(61)
+        write("hello", markedAs: nil, to: pasteboard)
+        sut.checkForClipboardChanges()
+        XCTAssertFalse(sut.isPaused)
+        XCTAssertEqual(captures(), [.text("hello")])
+    }
+
+    func test_itemCopiedWhilePaused_isNotCapturedAfterResume() {
+        let (sut, pasteboard, captures) = makeSUT()
+        sut.pause(until: nil)
+        write("secret", markedAs: nil, to: pasteboard)
+        sut.checkForClipboardChanges()
+        sut.resume()
+        sut.checkForClipboardChanges()
+        XCTAssertTrue(captures().isEmpty)
+    }
+
+    func test_resumeBeforeDeadline_capturesAgain() {
+        let clock = Date(timeIntervalSince1970: 0)
+        let (sut, pasteboard, captures) = makeSUT(now: { clock })
+        sut.pause(until: clock.addingTimeInterval(3600))
+        sut.resume()
         write("hello", markedAs: nil, to: pasteboard)
         sut.checkForClipboardChanges()
         XCTAssertEqual(captures(), [.text("hello")])
