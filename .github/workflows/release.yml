@@ -51,7 +51,13 @@ jobs:
         run: xcodegen generate
 
       - name: Build Release
-        run: make archive zip sha VERSION=${{ steps.version.outputs.value }} BUILD=${{ github.run_number }}
+        run: make archive VERSION=${{ steps.version.outputs.value }} BUILD=${{ github.run_number }}
+
+      - name: Verify bundle
+        run: scripts/verify-bundle.sh dist/ClipboardManager.app
+
+      - name: Zip
+        run: make zip sha VERSION=${{ steps.version.outputs.value }}
 
       - name: Read SHA256
         id: sha

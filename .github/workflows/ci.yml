@@ -38,5 +38,8 @@ jobs:
       - name: Build
         run: make build
 
+      - name: Verify bundle
+        run: scripts/verify-bundle.sh build/Build/Products/Debug/ClipboardManager.app
+
       - name: Test
         run: make test
