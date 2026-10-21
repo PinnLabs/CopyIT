@@ -169,11 +169,50 @@ final class ClipboardStoreTests: XCTestCase {
         XCTAssertNil(imageFileStore.load(fileName: imageFileName))
     }
 
-    private func makeStoredImage(data: Data) -> ClipboardItem {
+    // MARK: - PruneExpiredItemsUseCase
+
+    private let pruneNow = Date(timeIntervalSince1970: 1_000_000_000)
+    private let oneDay: TimeInterval = 24 * 60 * 60
+
+    func test_pruneExpiredItems_deletesOnlyItemsOlderThanRetention() {
+        let preferences = MockPreferences()
+        preferences.retention = .sevenDays
+        sut.save(ClipboardItem(content: "old", type: .text, createdAt: pruneNow.addingTimeInterval(-8 * oneDay)))
+        sut.save(ClipboardItem(content: "recent", type: .text, createdAt: pruneNow.addingTimeInterval(-6 * oneDay)))
+
+        PruneExpiredItemsUseCase(store: sut, preferences: preferences, now: { self.pruneNow }).execute()
+
+        XCTAssertEqual(sut.fetchAll().map(\.content), ["recent"])
+    }
+
+    func test_pruneExpiredItems_withForever_keepsEverything() {
+        let preferences = MockPreferences()
+        sut.save(ClipboardItem(content: "ancient", type: .text, createdAt: Date(timeIntervalSince1970: 0)))
+
+        PruneExpiredItemsUseCase(store: sut, preferences: preferences, now: { self.pruneNow }).execute()
+
+        XCTAssertEqual(sut.fetchAll().count, 1)
+    }
+
+    func test_pruneExpiredItems_deletesImagesOfRemovedItems() throws {
+        let preferences = MockPreferences()
+        preferences.retention = .oneDay
+        let image = makeStoredImage(data: Data([0x89, 0x50, 0x4E, 0x47, 0x02]), createdAt: pruneNow.addingTimeInterval(-2 * oneDay))
+        sut.save(image)
+        let imageFileName = try XCTUnwrap(image.imageFileName)
+
+        PruneExpiredItemsUseCase(store: sut, preferences: preferences, now: { self.pruneNow }).execute()
+
+        XCTAssertTrue(sut.fetchAll().isEmpty)
+        XCTAssertNil(imageFileStore.load(fileName: imageFileName))
+    }
+
+    private func makeStoredImage(data: Data, createdAt: Date = Date()) -> ClipboardItem {
         let stored = imageFileStore.store(data: data, pasteboardType: "public.png")!
         return ClipboardItem(
             content: "Image",
             type: .image,
+            createdAt: createdAt,
             imagePasteboardType: "public.png"
         ).storedImage(
             imageFileName: stored.imageFileName,

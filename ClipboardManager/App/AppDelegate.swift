@@ -9,6 +9,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var store: ClipboardStoring?
     private var launchAtLogin: LaunchAtLoginManaging?
     private var settingsWindow: SettingsWindowController?
+    private var pruneTimer: Timer?
+
+    private static let pruneInterval: TimeInterval = 60 * 60
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let imageFileStore = ImageFileStore()
@@ -17,6 +20,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let monitor: ClipboardMonitoring = ClipboardMonitor()
         let hotkey: HotkeyRegistering = HotkeyManager()
         let launchAtLogin: LaunchAtLoginManaging = LaunchAtLoginService()
+        let pruneExpiredItems = PruneExpiredItemsUseCase(store: store, preferences: preferences)
+        pruneExpiredItems.execute()
 
         let viewModel = PopoverViewModel(
             fetchUseCase: FetchHistoryUseCase(store: store),
@@ -32,8 +37,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 applyHistoryLimitUseCase: ApplyHistoryLimitUseCase(store: store, preferences: preferences)
             )
         )
-        let statusBar = StatusBarController(viewModel: viewModel, monitor: monitor) { [weak settingsWindow] in
-            settingsWindow?.show()
+        let statusBar = StatusBarController(
+            viewModel: viewModel,
+            monitor: monitor,
+            onOpenSettings: { [weak settingsWindow] in settingsWindow?.show() },
+            onWillShowPopover: { pruneExpiredItems.execute() }
+        )
+        pruneTimer = Timer.scheduledTimer(withTimeInterval: Self.pruneInterval, repeats: true) { [weak viewModel] _ in
+            pruneExpiredItems.execute()
+            Task { @MainActor in viewModel?.refresh() }
         }
 
         monitor.onNewItem = { [weak viewModel] capture in
@@ -81,6 +93,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        pruneTimer?.invalidate()
+        pruneTimer = nil
         monitor?.stopMonitoring()
         hotkey?.unregister()
     }
