@@ -55,12 +55,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         hotkey.register()
 
-        do {
-            try launchAtLogin.enable()
-        } catch {
-            AppLogger.launchAtLogin.error("Failed to register: \(error.localizedDescription, privacy: .public)")
-        }
-
+        // Launch at login is opt-in from Settings. Existing users stay registered: SMAppService keeps the
+        // registration across launches, and nothing here calls disable().
         self.store = store
         self.monitor = monitor
         self.hotkey = hotkey
