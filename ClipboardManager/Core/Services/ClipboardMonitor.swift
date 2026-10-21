@@ -16,6 +16,10 @@ final class ClipboardMonitor: ClipboardMonitoring {
     private let pasteboard: NSPasteboard
     private let ignoredApps: IgnoredAppsProviding
     private let frontmostApp: FrontmostAppProviding
+    private let now: () -> Date
+    // Pause state is in-memory only: relaunching the app resumes capture.
+    private var isPausedIndefinitely = false
+    private var pausedUntil: Date?
     private var timer: Timer?
     private var lastChangeCount: Int
 
@@ -23,12 +27,14 @@ final class ClipboardMonitor: ClipboardMonitoring {
         pollInterval: TimeInterval = 0.5,
         pasteboard: NSPasteboard = .general,
         ignoredApps: IgnoredAppsProviding = UserDefaultsIgnoredApps(),
-        frontmostApp: FrontmostAppProviding = WorkspaceFrontmostApp()
+        frontmostApp: FrontmostAppProviding = WorkspaceFrontmostApp(),
+        now: @escaping () -> Date = Date.init
     ) {
         self.pollInterval = pollInterval
         self.pasteboard = pasteboard
         self.ignoredApps = ignoredApps
         self.frontmostApp = frontmostApp
+        self.now = now
         self.lastChangeCount = pasteboard.changeCount
     }
 
@@ -46,10 +52,27 @@ final class ClipboardMonitor: ClipboardMonitoring {
         timer = nil
     }
 
+    var isPaused: Bool {
+        if isPausedIndefinitely { return true }
+        guard let pausedUntil else { return false }
+        return now() < pausedUntil
+    }
+
+    func pause(until date: Date?) {
+        isPausedIndefinitely = date == nil
+        pausedUntil = date
+    }
+
+    func resume() {
+        isPausedIndefinitely = false
+        pausedUntil = nil
+    }
+
     func checkForClipboardChanges() {
         let current = pasteboard.changeCount
         guard current != lastChangeCount else { return }
         lastChangeCount = current
+        guard !isPaused else { return }
 
         let types = Set(pasteboard.types ?? [])
         guard types.isDisjoint(with: Self.ignoredPasteboardTypes) else {
