@@ -20,7 +20,34 @@ struct PopoverView: View {
         .frame(width: 360, height: 480)
         .background(VisualEffectBackground())
         .onAppear { viewModel.refresh() }
-        .background(keyboardHandler)
+        // Handled here rather than by a first-responder view so the keys work while the search
+        // field keeps focus; unhandled keys (including ⌫) fall through to the field.
+        .onKeyPress(.downArrow) {
+            viewModel.moveSelection(by: 1)
+            return .handled
+        }
+        .onKeyPress(.upArrow) {
+            viewModel.moveSelection(by: -1)
+            return .handled
+        }
+        .onKeyPress(.return) {
+            viewModel.copySelected()
+            onClose()
+            return .handled
+        }
+        .onKeyPress(.escape) {
+            if viewModel.handleEscape() { onClose() }
+            return .handled
+        }
+        .background(deleteSelectedShortcut)
+    }
+
+    /// ⌘⌫ deletes the selected item even while the search field has focus.
+    private var deleteSelectedShortcut: some View {
+        Button("Delete Selected Item", action: viewModel.deleteSelected)
+            .keyboardShortcut(.delete, modifiers: .command)
+            .hidden()
+            .accessibilityHidden(true)
     }
 
     private var header: some View {
@@ -97,19 +124,6 @@ struct PopoverView: View {
         }
         .padding(.horizontal, 12)
     }
-
-    private var keyboardHandler: some View {
-        KeyEventHandling(
-            onArrowDown: { viewModel.moveSelection(by: 1) },
-            onArrowUp: { viewModel.moveSelection(by: -1) },
-            onReturn: {
-                viewModel.copySelected()
-                onClose()
-            },
-            onDelete: { viewModel.deleteSelected() },
-            onEscape: { onClose() }
-        )
-    }
 }
 
 private struct VisualEffectBackground: NSViewRepresentable {
@@ -122,64 +136,4 @@ private struct VisualEffectBackground: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: NSVisualEffectView, context: Context) {}
-}
-
-private struct KeyEventHandling: NSViewRepresentable {
-    let onArrowDown: () -> Void
-    let onArrowUp: () -> Void
-    let onReturn: () -> Void
-    let onDelete: () -> Void
-    let onEscape: () -> Void
-
-    func makeNSView(context: Context) -> KeyCaptureView {
-        let view = KeyCaptureView()
-        view.handlers = .init(
-            arrowDown: onArrowDown,
-            arrowUp: onArrowUp,
-            returnKey: onReturn,
-            deleteKey: onDelete,
-            escape: onEscape
-        )
-        return view
-    }
-
-    func updateNSView(_ nsView: KeyCaptureView, context: Context) {
-        nsView.handlers = .init(
-            arrowDown: onArrowDown,
-            arrowUp: onArrowUp,
-            returnKey: onReturn,
-            deleteKey: onDelete,
-            escape: onEscape
-        )
-    }
-}
-
-final class KeyCaptureView: NSView {
-    struct Handlers {
-        let arrowDown: () -> Void
-        let arrowUp: () -> Void
-        let returnKey: () -> Void
-        let deleteKey: () -> Void
-        let escape: () -> Void
-    }
-
-    var handlers: Handlers?
-
-    override var acceptsFirstResponder: Bool { true }
-
-    override func viewDidMoveToWindow() {
-        super.viewDidMoveToWindow()
-        window?.makeFirstResponder(self)
-    }
-
-    override func keyDown(with event: NSEvent) {
-        switch event.keyCode {
-        case 125: handlers?.arrowDown()
-        case 126: handlers?.arrowUp()
-        case 36, 76: handlers?.returnKey()
-        case 51, 117: handlers?.deleteKey()
-        case 53: handlers?.escape()
-        default: super.keyDown(with: event)
-        }
-    }
 }
