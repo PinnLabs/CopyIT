@@ -7,9 +7,11 @@ import SwiftUI
 final class SettingsWindowController: NSWindowController {
     private let viewModel: SettingsViewModel
 
-    init(viewModel: SettingsViewModel) {
+    init(viewModel: SettingsViewModel, privacyViewModel: PrivacySettingsViewModel) {
         self.viewModel = viewModel
-        let window = NSWindow(contentViewController: NSHostingController(rootView: SettingsView(viewModel: viewModel)))
+        let window = NSWindow(contentViewController: NSHostingController(
+            rootView: SettingsView(viewModel: viewModel, privacyViewModel: privacyViewModel)
+        ))
         window.title = "CopyIT Settings"
         window.styleMask = [.titled, .closable]
         window.isReleasedWhenClosed = false

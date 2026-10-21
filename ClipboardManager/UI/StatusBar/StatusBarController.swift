@@ -8,6 +8,7 @@ final class StatusBarController: NSObject {
     private let viewModel: PopoverViewModel
     private let monitor: ClipboardMonitoring
     private let onOpenSettings: () -> Void
+    private let onWillShowPopover: () -> Void
     private var eventMonitor: Any?
     private var resumeTimer: Timer?
 
@@ -17,11 +18,13 @@ final class StatusBarController: NSObject {
     init(
         viewModel: PopoverViewModel,
         monitor: ClipboardMonitoring,
-        onOpenSettings: @escaping () -> Void
+        onOpenSettings: @escaping () -> Void,
+        onWillShowPopover: @escaping () -> Void = {}
     ) {
         self.viewModel = viewModel
         self.monitor = monitor
         self.onOpenSettings = onOpenSettings
+        self.onWillShowPopover = onWillShowPopover
         self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         self.popover = NSPopover()
         super.init()
@@ -142,6 +145,7 @@ final class StatusBarController: NSObject {
 
     private func showPopover() {
         guard let button = statusItem.button else { return }
+        onWillShowPopover()
         viewModel.refresh()
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         popover.contentViewController?.view.window?.makeKey()

@@ -4,12 +4,14 @@ struct SettingsView: View {
     private static let width: CGFloat = 460
 
     let viewModel: SettingsViewModel
+    let privacyViewModel: PrivacySettingsViewModel
 
     var body: some View {
-        // New tabs (e.g. Privacy) go next to General.
         TabView {
             GeneralSettingsView(viewModel: viewModel)
                 .tabItem { Label("General", systemImage: "gearshape") }
+            PrivacySettingsView(viewModel: privacyViewModel)
+                .tabItem { Label("Privacy", systemImage: "hand.raised") }
         }
         .frame(width: Self.width)
         .fixedSize(horizontal: false, vertical: true)

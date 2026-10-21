@@ -11,7 +11,7 @@
 
 Native macOS menu bar clipboard manager. Open source, MIT-licensed.
 
-## Features (v1.0)
+## Features
 
 - Lives in the menu bar — no Dock icon, no `⌘Tab` clutter (`LSUIElement`).
 - Tracks recent clipboard entries (text, URLs, and images) — 50 by default.
@@ -22,7 +22,9 @@ Native macOS menu bar clipboard manager. Open source, MIT-licensed.
 - Optional launch at login (`SMAppService`).
 - Configurable history size (25 to 200 items).
 - Skips items that password managers mark as sensitive or temporary (nspasteboard.org markers).
-- Skips anything copied while an ignored app is frontmost (defaults: Keychain Access, Passwords, 1Password, Bitwarden).
+- Skips anything copied while an ignored app is frontmost (defaults: Keychain Access, Passwords, 1Password, Bitwarden); edit the list in Settings → Privacy.
+- Optionally deletes items older than 1, 7, 30 or 90 days.
+- Optionally clears the history when quitting.
 - Pause capture from the menu bar right-click menu (15 minutes, 1 hour, or until resumed).
 - Persists history metadata in `UserDefaults` and image payloads in Application Support.
 

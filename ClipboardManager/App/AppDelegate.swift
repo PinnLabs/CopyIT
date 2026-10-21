@@ -9,14 +9,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var store: ClipboardStoring?
     private var launchAtLogin: LaunchAtLoginManaging?
     private var settingsWindow: SettingsWindowController?
+    private var pruneTimer: Timer?
+    private var shutdownCoordinator: ShutdownCoordinator?
+
+    private static let pruneInterval: TimeInterval = 60 * 60
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let imageFileStore = ImageFileStore()
         let preferences: PreferencesStoring = UserDefaultsPreferences()
         let store: ClipboardStoring = UserDefaultsStore(imageFileStore: imageFileStore, preferences: preferences)
-        let monitor: ClipboardMonitoring = ClipboardMonitor()
+        let ignoredApps: IgnoredAppsProviding = UserDefaultsIgnoredApps()
+        let monitor: ClipboardMonitoring = ClipboardMonitor(ignoredApps: ignoredApps)
         let hotkey: HotkeyRegistering = HotkeyManager()
         let launchAtLogin: LaunchAtLoginManaging = LaunchAtLoginService()
+        let shutdownCoordinator = ShutdownCoordinator(
+            preferences: preferences,
+            clearHistoryUseCase: ClearHistoryUseCase(store: store)
+        )
+        shutdownCoordinator.handleLaunch()
+        let pruneExpiredItems = PruneExpiredItemsUseCase(store: store, preferences: preferences)
+        pruneExpiredItems.execute()
 
         let viewModel = PopoverViewModel(
             fetchUseCase: FetchHistoryUseCase(store: store),
@@ -30,10 +42,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 preferences: preferences,
                 launchAtLogin: launchAtLogin,
                 applyHistoryLimitUseCase: ApplyHistoryLimitUseCase(store: store, preferences: preferences)
+            ),
+            privacyViewModel: PrivacySettingsViewModel(
+                preferences: preferences,
+                ignoredApps: ignoredApps,
+                appInfo: WorkspaceAppInfo(),
+                pruneExpiredItemsUseCase: pruneExpiredItems
             )
         )
-        let statusBar = StatusBarController(viewModel: viewModel, monitor: monitor) { [weak settingsWindow] in
-            settingsWindow?.show()
+        let statusBar = StatusBarController(
+            viewModel: viewModel,
+            monitor: monitor,
+            onOpenSettings: { [weak settingsWindow] in settingsWindow?.show() },
+            onWillShowPopover: { pruneExpiredItems.execute() }
+        )
+        pruneTimer = Timer.scheduledTimer(withTimeInterval: Self.pruneInterval, repeats: true) { [weak viewModel] _ in
+            pruneExpiredItems.execute()
+            Task { @MainActor in viewModel?.refresh() }
         }
 
         monitor.onNewItem = { [weak viewModel] capture in
@@ -74,6 +99,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         self.statusBar = statusBar
         self.launchAtLogin = launchAtLogin
         self.settingsWindow = settingsWindow
+        self.shutdownCoordinator = shutdownCoordinator
     }
 
     func openSettings() {
@@ -81,7 +107,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        pruneTimer?.invalidate()
+        pruneTimer = nil
         monitor?.stopMonitoring()
         hotkey?.unregister()
+        shutdownCoordinator?.handleTerminate()
     }
 }
