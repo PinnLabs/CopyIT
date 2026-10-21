@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- App icon, menu bar icon and brand assets.
+- Skip clipboard items that password managers mark as concealed, transient or auto-generated.
+- Skip items copied while an ignored app is frontmost (Keychain Access, Passwords, 1Password, Bitwarden by default).
+- Pause capture from the menu bar (15 minutes, 1 hour, or until resumed).
+- Settings window with launch at login and history size (25 to 200 items).
+- Issue and PR templates, security policy and code of conduct.
+
+### Changed
+
+- The global shortcut no longer requires Input Monitoring or Accessibility permission.
+- Launch at login is now opt-in instead of always on.
+
+### Removed
+
+- Unused Apple Events entitlement and usage description.
+
 ## [1.1.0] - 2026-08-04
 
 ### Added
