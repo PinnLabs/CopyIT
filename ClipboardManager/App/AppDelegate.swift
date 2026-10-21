@@ -18,7 +18,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let imageFileStore = ImageFileStore()
         let preferences: PreferencesStoring = UserDefaultsPreferences()
         let store: ClipboardStoring = UserDefaultsStore(imageFileStore: imageFileStore, preferences: preferences)
-        let monitor: ClipboardMonitoring = ClipboardMonitor()
+        let ignoredApps: IgnoredAppsProviding = UserDefaultsIgnoredApps()
+        let monitor: ClipboardMonitoring = ClipboardMonitor(ignoredApps: ignoredApps)
         let hotkey: HotkeyRegistering = HotkeyManager()
         let launchAtLogin: LaunchAtLoginManaging = LaunchAtLoginService()
         let shutdownCoordinator = ShutdownCoordinator(
@@ -41,6 +42,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 preferences: preferences,
                 launchAtLogin: launchAtLogin,
                 applyHistoryLimitUseCase: ApplyHistoryLimitUseCase(store: store, preferences: preferences)
+            ),
+            privacyViewModel: PrivacySettingsViewModel(
+                preferences: preferences,
+                ignoredApps: ignoredApps,
+                appInfo: WorkspaceAppInfo(),
+                pruneExpiredItemsUseCase: pruneExpiredItems
             )
         )
         let statusBar = StatusBarController(
