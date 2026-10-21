@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CopyIT — Clipboard manager for macOS</title>
+  <meta name="description" content="Native macOS menu bar clipboard manager. Free, open source, no account, no telemetry. Your history stays on your Mac.">
+  <meta property="og:title" content="CopyIT — Clipboard manager for macOS">
+  <meta property="og:description" content="Free, open source clipboard history for the macOS menu bar.">
+  <meta property="og:image" content="assets/social-preview.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/mark-dark.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a href="#" class="brand" aria-label="CopyIT home">
+        <picture>
+          <source media="(prefers-color-scheme: dark)" srcset="assets/lockup-light.svg">
+          <img src="assets/lockup-dark.svg" alt="CopyIT" height="32">
+        </picture>
+      </a>
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#privacy">Privacy</a>
+        <a href="#faq">FAQ</a>
+        <a href="https://github.com/PinnLabs/CopyIT">GitHub</a>
+        <a class="btn btn-small" href="https://github.com/PinnLabs/CopyIT/releases/latest">Download</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero wrap">
+      <p class="eyebrow">Free · Open source · macOS 14+</p>
+      <h1>Everything you copy,<br>one shortcut away.</h1>
+      <p class="lead">CopyIT lives in your menu bar and remembers your clipboard — text, links and images. Press <kbd>⌥</kbd><kbd>Space</kbd>, find it, paste it.</p>
+      <div class="cta">
+        <a class="btn" href="https://github.com/PinnLabs/CopyIT/releases/latest">Download for Mac</a>
+        <button class="code" type="button" data-copy="brew tap PinnLabs/tap && brew install --cask copyit" title="Copy to clipboard">
+          <span>$ brew install --cask copyit</span><span class="copy-hint">copy</span>
+        </button>
+      </div>
+      <p class="note">No account. No telemetry. No paid tier. MIT licensed.</p>
+      <div class="shot">
+        <img src="https://raw.githubusercontent.com/PinnLabs/CopyIT/master/.github/assets/demo.gif" alt="CopyIT popover showing clipboard history with search" loading="lazy" width="1600" height="1000">
+      </div>
+    </section>
+
+    <section id="features" class="wrap section">
+      <h2>Small app. Does the job.</h2>
+      <p class="section-lead">No Dock icon, no setup, no permissions to grant. It just sits in the menu bar.</p>
+      <div class="grid">
+        <article class="card"><span class="tag">⌥Space</span><h3>Global hotkey</h3><p>Open your history from any app. No Accessibility or Input Monitoring access needed.</p></article>
+        <article class="card"><span class="tag">search</span><h3>Live filtering</h3><p>Start typing to filter. Case-insensitive, instant.</p></article>
+        <article class="card"><span class="tag">↑ ↓ ↩</span><h3>Keyboard first</h3><p>Arrows to move, <kbd>↩</kbd> to copy, <kbd>⌘⌫</kbd> to delete, <kbd>esc</kbd> to close. Works while you type.</p></article>
+        <article class="card"><span class="tag">txt · url · img</span><h3>Text, links and images</h3><p>Keeps 50 items by default. Pick anything from 25 to 200.</p></article>
+        <article class="card"><span class="tag">pause</span><h3>Pause capture</h3><p>Stop recording for 15 minutes, an hour, or until you resume — right from the menu bar.</p></article>
+        <article class="card"><span class="tag">login</span><h3>Launch at login</h3><p>Optional. Starts quietly with your Mac and stays out of <kbd>⌘Tab</kbd>.</p></article>
+      </div>
+    </section>
+
+    <section id="privacy" class="section band">
+      <div class="wrap split">
+        <div>
+          <h2>Your clipboard is yours.</h2>
+          <p class="section-lead">History never leaves your Mac. There is no server to send it to.</p>
+        </div>
+        <ul class="checks">
+          <li><strong>Skips secrets.</strong> Items that password managers mark as sensitive or temporary are never saved.</li>
+          <li><strong>Ignores apps.</strong> Nothing is captured while Keychain Access, Passwords, 1Password or Bitwarden is in front. Edit the list in Settings.</li>
+          <li><strong>Forgets on schedule.</strong> Auto-delete items older than 1, 7, 30 or 90 days, or clear everything on quit.</li>
+          <li><strong>Open code.</strong> Read every line on GitHub. Build it yourself if you like.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="faq" class="wrap section narrow">
+      <h2>FAQ</h2>
+      <details><summary>Is it really free?</summary><p>Yes. CopyIT is MIT licensed, with no paid tier, ads or account. It's built by PinnLabs in the open.</p></details>
+      <details><summary>macOS says the app can't be opened.</summary><p>The app is ad-hoc signed. Right-click it and choose <strong>Open</strong> the first time, or run <code>xattr -dr com.apple.quarantine /Applications/ClipboardManager.app</code>. Installing with Homebrew avoids this.</p></details>
+      <details><summary>Which macOS versions are supported?</summary><p>macOS 14 Sonoma or later.</p></details>
+      <details><summary>Does it sync between devices?</summary><p>No. Your history stays on this Mac on purpose.</p></details>
+      <details><summary>Where is my data stored?</summary><p>History metadata lives in UserDefaults and images in Application Support, both inside your user account.</p></details>
+      <details><summary>How can I help?</summary><p>Report bugs, suggest features or send a pull request on <a href="https://github.com/PinnLabs/CopyIT">GitHub</a>. See the contributing guide.</p></details>
+    </section>
+
+    <section class="wrap section final">
+      <h2>Stop losing what you copied.</h2>
+      <a class="btn" href="https://github.com/PinnLabs/CopyIT/releases/latest">Download CopyIT</a>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <span>© 2026 PinnLabs · MIT License</span>
+      <nav>
+        <a href="https://github.com/PinnLabs/CopyIT">GitHub</a>
+        <a href="https://github.com/PinnLabs/CopyIT/releases">Releases</a>
+        <a href="https://github.com/PinnLabs/CopyIT/issues">Issues</a>
+        <a href="https://github.com/PinnLabs/CopyIT/blob/master/CONTRIBUTING.md">Contributing</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll('[data-copy]').forEach((el) => {
+      el.addEventListener('click', async () => {
+        const hint = el.querySelector('.copy-hint');
+        try { await navigator.clipboard.writeText(el.dataset.copy); hint.textContent = 'copied'; }
+        catch { hint.textContent = 'press ⌘C'; }
+        setTimeout(() => (hint.textContent = 'copy'), 1600);
+      });
+    });
+  </script>
+</body>
+</html>
