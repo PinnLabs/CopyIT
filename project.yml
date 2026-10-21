@@ -27,7 +27,6 @@ targets:
       - path: ClipboardManager
         excludes:
           - "Resources/**"
-    resources:
       - path: ClipboardManager/Resources/Assets.xcassets
     info:
       path: ClipboardManager/Resources/Info.plist
