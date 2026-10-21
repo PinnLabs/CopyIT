@@ -5,6 +5,7 @@ DERIVED := build
 APP_NAME := ClipboardManager.app
 RELEASE_DIR := dist
 VERSION ?= $(shell git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo 0.0.0)
+BUILD ?= 1
 
 .PHONY: setup generate build run test clean lint release archive zip sha icons
 
@@ -40,7 +41,8 @@ release: clean generate archive zip sha
 
 archive:
 	@mkdir -p $(RELEASE_DIR)
-	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -configuration Release -derivedDataPath $(DERIVED) build
+	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -configuration Release -derivedDataPath $(DERIVED) \
+		MARKETING_VERSION=$(VERSION) CURRENT_PROJECT_VERSION=$(BUILD) build
 	cp -R $(DERIVED)/Build/Products/Release/$(APP_NAME) $(RELEASE_DIR)/
 
 zip:
