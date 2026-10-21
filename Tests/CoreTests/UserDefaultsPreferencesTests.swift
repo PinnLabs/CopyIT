@@ -25,4 +25,26 @@ final class UserDefaultsPreferencesTests: XCTestCase {
         defaults.set(37, forKey: UserDefaultsPreferences.historyLimitKey)
         XCTAssertEqual(UserDefaultsPreferences(defaults: defaults).historyLimit, 50)
     }
+
+    func test_retentionAndClearOnQuit_haveDefaults() throws {
+        let sut = UserDefaultsPreferences(defaults: try makeDefaults())
+        XCTAssertEqual(sut.retention, .forever)
+        XCTAssertFalse(sut.clearsHistoryOnQuit)
+    }
+
+    func test_retentionAndClearOnQuit_readSavedValues() throws {
+        let defaults = try makeDefaults()
+        let writer = UserDefaultsPreferences(defaults: defaults)
+        writer.retention = .thirtyDays
+        writer.clearsHistoryOnQuit = true
+        let sut = UserDefaultsPreferences(defaults: defaults)
+        XCTAssertEqual(sut.retention, .thirtyDays)
+        XCTAssertTrue(sut.clearsHistoryOnQuit)
+    }
+
+    func test_retention_invalidStoredValue_fallsBackToForever() throws {
+        let defaults = try makeDefaults()
+        defaults.set("fortnight", forKey: UserDefaultsPreferences.retentionKey)
+        XCTAssertEqual(UserDefaultsPreferences(defaults: defaults).retention, .forever)
+    }
 }

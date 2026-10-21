@@ -2,6 +2,10 @@ import Foundation
 
 protocol PreferencesStoring: AnyObject {
     var historyLimit: Int { get set }
+    /// Defaults to `.forever`.
+    var retention: HistoryRetention { get set }
+    /// Defaults to `false`.
+    var clearsHistoryOnQuit: Bool { get set }
 }
 
 enum HistoryLimit {
