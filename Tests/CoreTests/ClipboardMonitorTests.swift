@@ -42,10 +42,17 @@ final class ClipboardMonitorTests: XCTestCase {
     private let concealed = NSPasteboard.PasteboardType("org.nspasteboard.ConcealedType")
     private let transient = NSPasteboard.PasteboardType("org.nspasteboard.TransientType")
 
-    private func makeSUT() -> (ClipboardMonitor, NSPasteboard, () -> [ClipboardCapture]) {
+    private func makeSUT(
+        frontmost: String? = nil,
+        ignored: [String] = []
+    ) -> (ClipboardMonitor, NSPasteboard, () -> [ClipboardCapture]) {
         let pasteboard = NSPasteboard.withUniqueName()
         addTeardownBlock { pasteboard.releaseGlobally() }
-        let sut = ClipboardMonitor(pasteboard: pasteboard)
+        let sut = ClipboardMonitor(
+            pasteboard: pasteboard,
+            ignoredApps: MockIgnoredApps(bundleIdentifiers: ignored),
+            frontmostApp: MockFrontmostApp(frontmostBundleIdentifier: frontmost)
+        )
         var captures: [ClipboardCapture] = []
         sut.onNewItem = { captures.append($0) }
         return (sut, pasteboard, { captures })
@@ -93,6 +100,29 @@ final class ClipboardMonitorTests: XCTestCase {
         let (sut, pasteboard, captures) = makeSUT()
         write("secret", markedAs: concealed, to: pasteboard)
         sut.checkForClipboardChanges()
+        write("hello", markedAs: nil, to: pasteboard)
+        sut.checkForClipboardChanges()
+        XCTAssertEqual(captures(), [.text("hello")])
+    }
+
+    // MARK: - Ignored apps
+
+    func test_itemFromIgnoredApp_isIgnored() {
+        let (sut, pasteboard, captures) = makeSUT(frontmost: "com.bitwarden.desktop", ignored: ["com.bitwarden.desktop"])
+        write("secret", markedAs: nil, to: pasteboard)
+        sut.checkForClipboardChanges()
+        XCTAssertTrue(captures().isEmpty)
+    }
+
+    func test_itemFromNonIgnoredApp_isCaptured() {
+        let (sut, pasteboard, captures) = makeSUT(frontmost: "com.apple.Safari", ignored: ["com.bitwarden.desktop"])
+        write("hello", markedAs: nil, to: pasteboard)
+        sut.checkForClipboardChanges()
+        XCTAssertEqual(captures(), [.text("hello")])
+    }
+
+    func test_noFrontmostApp_doesNotBlockCapture() {
+        let (sut, pasteboard, captures) = makeSUT(frontmost: nil, ignored: ["com.bitwarden.desktop"])
         write("hello", markedAs: nil, to: pasteboard)
         sut.checkForClipboardChanges()
         XCTAssertEqual(captures(), [.text("hello")])
