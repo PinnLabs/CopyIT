@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="brand/logo/lockup-light.svg">
+    <img src="brand/logo/lockup-dark.svg" alt="CopyIT" height="72">
+  </picture>
+</p>
+
 # CopyIT — ClipboardManager
 
 <video src=".github/assets/demo.mp4" controls width="1024"></video>
@@ -79,6 +86,8 @@ ClipboardManager/
 ├── Infrastructure/
 │   └── Persistence/      # UserDefaultsStore (concrete ClipboardStoring)
 └── Resources/            # Info.plist, Assets.xcassets, entitlements
+brand/                    # Logo SVG masters + exports (see brand/README.md)
+scripts/export-icons.sh   # Regenerates app + menu bar icons from brand/
 Tests/
 ├── CoreTests/            # Store, monitor, use cases, hotkey, launch-at-login
 │   └── Mocks/            # Protocol-conforming mocks
@@ -99,6 +108,10 @@ Clean Architecture + SOLID. The composition root is `AppDelegate.applicationDidF
 ```
 
 Logging uses `OSLog.Logger` exposed via `AppLogger.<category>`.
+
+## Brand
+
+Logo, icon and usage rules live in [`brand/`](brand/README.md). Edit the SVG masters there and run `make icons` to regenerate the app and menu bar icons.
 
 ## Contributing
 

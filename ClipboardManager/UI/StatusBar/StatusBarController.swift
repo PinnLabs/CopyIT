@@ -42,11 +42,11 @@ final class StatusBarController: NSObject {
 
     private func configureStatusItem() {
         guard let button = statusItem.button else { return }
-        let image = NSImage(
-            systemSymbolName: "doc.on.clipboard",
-            accessibilityDescription: "Clipboard Manager"
-        )
+        let image = NSImage(named: "MenuBarIcon")
+            ?? NSImage(systemSymbolName: "doc.on.clipboard", accessibilityDescription: nil)
+        image?.size = NSSize(width: 18, height: 18)
         image?.isTemplate = true
+        image?.accessibilityDescription = "CopyIT"
         button.image = image
         button.action = #selector(handleClick(_:))
         button.target = self

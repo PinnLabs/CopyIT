@@ -6,7 +6,7 @@ APP_NAME := ClipboardManager.app
 RELEASE_DIR := dist
 VERSION ?= $(shell git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo 0.0.0)
 
-.PHONY: setup generate build run test clean lint release archive zip sha
+.PHONY: setup generate build run test clean lint release archive zip sha icons
 
 setup: generate
 	@command -v xcodegen >/dev/null 2>&1 || { echo "Install xcodegen: brew install xcodegen"; exit 1; }
@@ -26,6 +26,9 @@ test:
 clean:
 	rm -rf $(DERIVED) $(RELEASE_DIR)
 	xcodebuild -project $(PROJECT) -scheme $(SCHEME) clean || true
+
+icons:
+	./scripts/export-icons.sh
 
 lint:
 	@command -v swiftlint >/dev/null 2>&1 && swiftlint || echo "swiftlint not installed — skipping"
