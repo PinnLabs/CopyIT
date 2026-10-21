@@ -13,7 +13,9 @@
 
 Native macOS menu bar clipboard manager. CopyIT is 100% open source and MIT-licensed, with no catch: no account, no telemetry, no paid tier, no ads. Your history stays on your Mac.
 
-<video src=".github/assets/demo.mp4" controls width="1024"></video>
+<p align="center">
+  <img src=".github/assets/demo.gif" alt="CopyIT demo" width="800">
+</p>
 
 ## Features
 
