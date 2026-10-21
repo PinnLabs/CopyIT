@@ -5,24 +5,40 @@ Maintainer guide. End users do not need this.
 ## Pre-flight checklist
 
 - [ ] All tests pass locally: `make test`
+- [ ] Lint is clean: `make lint`
 - [ ] `master` is green in CI
 - [ ] README updated for any user-facing changes
 - [ ] No uncommitted changes: `git status` clean
 
 ## Cut a release
 
-```sh
-git tag v1.0.0
-git push origin v1.0.0
-```
+The app version comes from the tag: there's nothing to bump in `project.yml` or `Info.plist`.
+
+1. In `CHANGELOG.md`, rename `## [Unreleased]` to `## [1.2.0] - YYYY-MM-DD`, add a new empty
+   `## [Unreleased]` above it, and update the compare links at the bottom.
+2. Commit and push:
+
+   ```sh
+   git commit -am "chore: release 1.2.0"
+   git push
+   ```
+
+3. Tag and push the tag:
+
+   ```sh
+   git tag v1.2.0
+   git push origin v1.2.0
+   ```
 
 GitHub Actions (`.github/workflows/release.yml`) runs on the tag and:
 
-1. Builds Release-config `ClipboardManager.app` on `macos-14`
-2. Zips it with `ditto` (preserves resource forks)
-3. Computes SHA256
-4. Creates a GitHub Release with the zip attached
-5. Embeds the SHA256 in the release notes
+1. Fails early if `CHANGELOG.md` has no `## [1.2.0]` section
+2. Builds Release-config `ClipboardManager.app` on `macos-15`, with `MARKETING_VERSION` set to the
+   tag version and `CURRENT_PROJECT_VERSION` set to the workflow run number
+3. Zips it with `ditto` (preserves resource forks)
+4. Computes SHA256
+5. Creates a GitHub Release with the zip attached
+6. Embeds the SHA256 in the release notes
 
 ## Update the Homebrew Cask
 
@@ -46,7 +62,7 @@ Users get the update with `brew upgrade --cask copyit`.
 Useful before the first GitHub Release:
 
 ```sh
-make release VERSION=1.0.0
+make release VERSION=1.0.0 BUILD=1
 # Artifacts land in dist/
 # dist/CopyIT-1.0.0.zip
 # dist/CopyIT-1.0.0.zip.sha256
