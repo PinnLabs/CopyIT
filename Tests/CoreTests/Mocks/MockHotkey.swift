@@ -14,6 +14,8 @@ final class MockHotkey: HotkeyRegistering {
 
 final class MockLaunchAtLogin: LaunchAtLoginManaging {
     var isEnabled: Bool = false
+    var requiresApproval: Bool = false
+    private(set) var openSystemSettingsCalls = 0
     private(set) var enableCalls = 0
     private(set) var disableCalls = 0
     var enableError: Error?
@@ -30,4 +32,6 @@ final class MockLaunchAtLogin: LaunchAtLoginManaging {
         if let error = disableError { throw error }
         isEnabled = false
     }
+
+    func openSystemSettings() { openSystemSettingsCalls += 1 }
 }

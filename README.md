@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="brand/logo/lockup-light.svg">
+    <img src="brand/logo/lockup-dark.svg" alt="CopyIT" height="72">
+  </picture>
+</p>
+
 # CopyIT — ClipboardManager
 
 <video src=".github/assets/demo.mp4" controls width="1024"></video>
@@ -7,12 +14,16 @@ Native macOS menu bar clipboard manager. Open source, MIT-licensed.
 ## Features (v1.0)
 
 - Lives in the menu bar — no Dock icon, no `⌘Tab` clutter (`LSUIElement`).
-- Tracks the last 50 clipboard entries (text, URLs, and images).
+- Tracks recent clipboard entries (text, URLs, and images) — 50 by default.
 - Search with live filtering, case-insensitive.
 - Keyboard navigation: arrows to move, `↩` to copy, `⌫` to delete, `esc` to close.
 - Global hotkey `⌥Space` to toggle the popover from anywhere.
-- Right-click the status bar icon for quick actions (Open, Clear, Quit).
-- Launches at login (`SMAppService`).
+- Right-click the status bar icon for quick actions (Open, Settings…, Clear, Pause/Resume Capture, Quit). Open Settings with `⌘,` or the gear button in the popover.
+- Optional launch at login (`SMAppService`).
+- Configurable history size (25 to 200 items).
+- Skips items that password managers mark as sensitive or temporary (nspasteboard.org markers).
+- Skips anything copied while an ignored app is frontmost (defaults: Keychain Access, Passwords, 1Password, Bitwarden).
+- Pause capture from the menu bar right-click menu (15 minutes, 1 hour, or until resumed).
 - Persists history metadata in `UserDefaults` and image payloads in Application Support.
 
 ## Install
@@ -33,8 +44,6 @@ brew install --cask copyit
    ```sh
    xattr -dr com.apple.quarantine /Applications/ClipboardManager.app
    ```
-
-4. Grant **Input Monitoring** permission when prompted (System Settings → Privacy & Security → Input Monitoring) so `⌥Space` works.
 
 ### Build from source
 
@@ -59,7 +68,7 @@ Or open in Xcode after `make generate` and use `⌘R` / `⌘U`.
 
 ## Permissions
 
-The global hotkey relies on `CGEventTap`, which requires **Input Monitoring** permission. On first launch macOS prompts to grant access — open System Settings → Privacy & Security → Input Monitoring and enable ClipboardManager.
+CopyIT doesn't ask for any system permission. The global `⌥Space` shortcut is registered with `RegisterEventHotKey`, which needs no Input Monitoring or Accessibility access.
 
 ## Project structure
 
@@ -79,6 +88,8 @@ ClipboardManager/
 ├── Infrastructure/
 │   └── Persistence/      # UserDefaultsStore (concrete ClipboardStoring)
 └── Resources/            # Info.plist, Assets.xcassets, entitlements
+brand/                    # Logo SVG masters + exports (see brand/README.md)
+scripts/export-icons.sh   # Regenerates app + menu bar icons from brand/
 Tests/
 ├── CoreTests/            # Store, monitor, use cases, hotkey, launch-at-login
 │   └── Mocks/            # Protocol-conforming mocks
@@ -99,6 +110,10 @@ Clean Architecture + SOLID. The composition root is `AppDelegate.applicationDidF
 ```
 
 Logging uses `OSLog.Logger` exposed via `AppLogger.<category>`.
+
+## Brand
+
+Logo, icon and usage rules live in [`brand/`](brand/README.md). Edit the SVG masters there and run `make icons` to regenerate the app and menu bar icons.
 
 ## Contributing
 

@@ -1,4 +1,5 @@
 import XCTest
+import Carbon.HIToolbox
 @testable import ClipboardManager
 
 final class HotkeyManagerTests: XCTestCase {
@@ -12,10 +13,37 @@ final class HotkeyManagerTests: XCTestCase {
         XCTAssertEqual(mock.registerCalls, 1)
     }
 
-    func test_realHotkeyManager_canRegisterUnregisterWithoutCrash() {
+    func test_register_twiceThenUnregister_clearsState() {
         let sut = HotkeyManager()
         sut.register()
+        sut.register()
         sut.unregister()
+        XCTAssertFalse(sut.isRegistered)
+    }
+
+    func test_unregister_withoutRegister_doesNotCrash() {
+        let sut = HotkeyManager()
+        sut.unregister()
+        XCTAssertFalse(sut.isRegistered)
+    }
+
+    func test_handleHotKeyPressed_withMatchingID_triggersCallback() {
+        let sut = HotkeyManager()
+        let expectation = expectation(description: "hotkey triggered")
+        sut.onHotkeyTriggered = { expectation.fulfill() }
+        let handled = sut.handleHotKeyPressed(id: EventHotKeyID(signature: HotkeyManager.signature, id: HotkeyManager.hotKeyID))
+        XCTAssertTrue(handled)
+        wait(for: [expectation], timeout: 1)
+    }
+
+    func test_handleHotKeyPressed_withOtherIDOrSignature_doesNotTrigger() {
+        let sut = HotkeyManager()
+        let expectation = expectation(description: "hotkey not triggered")
+        expectation.isInverted = true
+        sut.onHotkeyTriggered = { expectation.fulfill() }
+        XCTAssertFalse(sut.handleHotKeyPressed(id: EventHotKeyID(signature: HotkeyManager.signature, id: 2)))
+        XCTAssertFalse(sut.handleHotKeyPressed(id: EventHotKeyID(signature: 0x5858_5858, id: HotkeyManager.hotKeyID)))
+        wait(for: [expectation], timeout: 0.2)
     }
 }
 

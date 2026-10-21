@@ -12,6 +12,10 @@ final class LaunchAtLoginService: LaunchAtLoginManaging {
         service.status == .enabled
     }
 
+    var requiresApproval: Bool {
+        service.status == .requiresApproval
+    }
+
     func enable() throws {
         guard service.status != .enabled else { return }
         try service.register()
@@ -20,5 +24,9 @@ final class LaunchAtLoginService: LaunchAtLoginManaging {
     func disable() throws {
         guard service.status != .notRegistered else { return }
         try service.unregister()
+    }
+
+    func openSystemSettings() {
+        SMAppService.openSystemSettingsLoginItems()
     }
 }
