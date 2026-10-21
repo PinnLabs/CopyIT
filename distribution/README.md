@@ -42,4 +42,3 @@ brew install --cask copyit
 
 - Cask supports ad-hoc-signed `.app` bundles.
 - `brew install --cask` automatically strips the `com.apple.quarantine` xattr so Gatekeeper does not block first launch.
-- macOS still warns about Input Monitoring permission for the hotkey (expected and required for `CGEventTap`).

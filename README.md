@@ -44,8 +44,6 @@ brew install --cask copyit
    xattr -dr com.apple.quarantine /Applications/ClipboardManager.app
    ```
 
-4. Grant **Input Monitoring** permission when prompted (System Settings → Privacy & Security → Input Monitoring) so `⌥Space` works.
-
 ### Build from source
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
@@ -69,7 +67,7 @@ Or open in Xcode after `make generate` and use `⌘R` / `⌘U`.
 
 ## Permissions
 
-The global hotkey relies on `CGEventTap`, which requires **Input Monitoring** permission. On first launch macOS prompts to grant access — open System Settings → Privacy & Security → Input Monitoring and enable ClipboardManager.
+CopyIT doesn't ask for any system permission. The global `⌥Space` shortcut is registered with `RegisterEventHotKey`, which needs no Input Monitoring or Accessibility access.
 
 ## Project structure
 
