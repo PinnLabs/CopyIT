@@ -14,15 +14,21 @@ final class ClipboardMonitor: ClipboardMonitoring {
 
     private let pollInterval: TimeInterval
     private let pasteboard: NSPasteboard
+    private let ignoredApps: IgnoredAppsProviding
+    private let frontmostApp: FrontmostAppProviding
     private var timer: Timer?
     private var lastChangeCount: Int
 
     init(
         pollInterval: TimeInterval = 0.5,
-        pasteboard: NSPasteboard = .general
+        pasteboard: NSPasteboard = .general,
+        ignoredApps: IgnoredAppsProviding = UserDefaultsIgnoredApps(),
+        frontmostApp: FrontmostAppProviding = WorkspaceFrontmostApp()
     ) {
         self.pollInterval = pollInterval
         self.pasteboard = pasteboard
+        self.ignoredApps = ignoredApps
+        self.frontmostApp = frontmostApp
         self.lastChangeCount = pasteboard.changeCount
     }
 
@@ -48,6 +54,13 @@ final class ClipboardMonitor: ClipboardMonitoring {
         let types = Set(pasteboard.types ?? [])
         guard types.isDisjoint(with: Self.ignoredPasteboardTypes) else {
             AppLogger.monitor.debug("Skipped pasteboard item marked as concealed, transient or auto-generated")
+            return
+        }
+
+        // shortcut: polling every 0.5 s means a quick app switch can report the wrong source app;
+        // upgrade to an event-based source if that becomes a problem.
+        if let bundleID = frontmostApp.frontmostBundleIdentifier, ignoredApps.isIgnored(bundleIdentifier: bundleID) {
+            AppLogger.monitor.debug("Skipped pasteboard item copied from ignored app \(bundleID, privacy: .public)")
             return
         }
 
