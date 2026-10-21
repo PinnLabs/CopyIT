@@ -41,6 +41,7 @@ code { background: var(--surface); padding: 0.1em 0.35em; border-radius: 4px; ov
 .section { padding: 96px 16px; }
 
 .nav { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+.brand img { height: 32px; width: auto; }
 .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; }
 .nav-links { display: flex; align-items: center; gap: 24px; font-size: 0.95rem; }
 .nav-links a:not(.btn) { text-decoration: none; color: var(--muted); }
