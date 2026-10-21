@@ -33,7 +33,7 @@ final class ClipboardMonitor: ClipboardMonitoring {
         timer = nil
     }
 
-    private func checkForClipboardChanges() {
+    func checkForClipboardChanges() {
         let current = pasteboard.changeCount
         guard current != lastChangeCount else { return }
         lastChangeCount = current
