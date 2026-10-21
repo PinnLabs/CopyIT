@@ -1,0 +1,13 @@
+# Mirrors the conventions in CONTRIBUTING.md; keep in sync with .swiftlint.yml.
+--exclude build,ClipboardManager.xcodeproj
+--swiftversion 5.9
+--indent 4
+--maxwidth 140
+--wraparguments before-first
+--wrapparameters before-first
+--wrapcollections before-first
+--stripunusedargs closure-only
+--header ignore
+# Match SwiftLint's trailing_comma and opening_brace rules.
+--commas inline
+--disable wrapMultilineStatementBraces

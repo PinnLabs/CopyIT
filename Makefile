@@ -7,7 +7,7 @@ RELEASE_DIR := dist
 VERSION ?= $(shell git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo 0.0.0)
 BUILD ?= 1
 
-.PHONY: setup generate build run test clean lint release archive zip sha icons
+.PHONY: setup generate build run test clean lint format release archive zip sha icons
 
 setup: generate
 	@command -v xcodegen >/dev/null 2>&1 || { echo "Install xcodegen: brew install xcodegen"; exit 1; }
@@ -32,7 +32,14 @@ icons:
 	./scripts/export-icons.sh
 
 lint:
-	@command -v swiftlint >/dev/null 2>&1 && swiftlint || echo "swiftlint not installed — skipping"
+	@command -v swiftlint >/dev/null 2>&1 || { echo "Install swiftlint: brew install swiftlint"; exit 1; }
+	@command -v swiftformat >/dev/null 2>&1 || { echo "Install swiftformat: brew install swiftformat"; exit 1; }
+	swiftlint lint --strict
+	swiftformat --lint .
+
+format:
+	@command -v swiftformat >/dev/null 2>&1 || { echo "Install swiftformat: brew install swiftformat"; exit 1; }
+	swiftformat .
 
 release: clean generate archive zip sha
 	@echo ""

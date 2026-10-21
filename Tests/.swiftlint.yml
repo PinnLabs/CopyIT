@@ -1,0 +1,7 @@
+# Force unwraps, casts and tries are allowed in tests (CONTRIBUTING.md limits them to production code).
+disabled_rules:
+  - force_unwrapping
+  - force_cast
+  - force_try
+  # makeSUT() helpers return (sut, collaborator, spy) triples.
+  - large_tuple

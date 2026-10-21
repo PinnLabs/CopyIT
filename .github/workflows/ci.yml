@@ -6,6 +6,18 @@ on:
   pull_request:
 
 jobs:
+  lint:
+    runs-on: macos-15
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install SwiftLint and SwiftFormat
+        run: brew install swiftlint swiftformat
+
+      - name: Lint
+        run: make lint
+
   test:
     runs-on: macos-15
     timeout-minutes: 20
