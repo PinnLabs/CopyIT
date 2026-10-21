@@ -1,15 +1,19 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="brand/logo/lockup-light.svg">
-    <img src="brand/logo/lockup-dark.svg" alt="CopyIT" height="72">
+    <img src="brand/logo/lockup-dark.svg" alt="CopyIT" height="140">
   </picture>
 </p>
 
-# CopyIT — ClipboardManager
+<p align="center">
+  <a href="https://github.com/PinnLabs/CopyIT/releases/latest">Download</a> ·
+  <a href="#install">Install</a> ·
+  <a href="CONTRIBUTING.md">Contributing</a>
+</p>
+
+Native macOS menu bar clipboard manager. CopyIT is 100% open source and MIT-licensed, with no catch: no account, no telemetry, no paid tier, no ads. Your history stays on your Mac.
 
 <video src=".github/assets/demo.mp4" controls width="1024"></video>
-
-Native macOS menu bar clipboard manager. Open source, MIT-licensed.
 
 ## Features
 
