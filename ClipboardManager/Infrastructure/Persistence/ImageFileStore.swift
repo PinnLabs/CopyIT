@@ -3,7 +3,9 @@ import Foundation
 import ImageIO
 import UniformTypeIdentifiers
 
-final class ImageFileStore {
+// @unchecked is safe: all stored properties are immutable `let`s, and FileManager is thread-safe,
+// so the store can be used from the ingestion queue and the main thread at the same time.
+final class ImageFileStore: @unchecked Sendable {
     struct StoredImage {
         let digest: String
         let imageFileName: String
