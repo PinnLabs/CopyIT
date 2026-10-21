@@ -33,7 +33,6 @@ targets:
         LSMinimumSystemVersion: "14.0"
         CFBundleShortVersionString: "1.1.0"
         CFBundleVersion: "2"
-        NSAppleEventsUsageDescription: "ClipboardManager needs accessibility access to register global hotkeys."
         NSHumanReadableCopyright: "Copyright © 2026 CopyIT. MIT License."
     settings:
       base:
