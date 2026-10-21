@@ -61,28 +61,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             Task { @MainActor in viewModel?.refresh() }
         }
 
+        let ingestion: ClipboardIngesting = ImageIngestionService(imageFileStore: imageFileStore)
         monitor.onNewItem = { [weak viewModel] capture in
-            let item: ClipboardItem
-            switch capture {
-            case .text(let raw):
-                item = ClipboardItem.from(pasteboardString: raw)
-            case .image(let data, let pasteboardType):
-                guard let stored = imageFileStore.store(data: data, pasteboardType: pasteboardType) else {
-                    return
-                }
-                item = ClipboardItem(
-                    content: "Image",
-                    type: .image,
-                    imagePasteboardType: pasteboardType
-                ).storedImage(
-                    imageFileName: stored.imageFileName,
-                    imageDigest: stored.digest,
-                    thumbnailFileName: stored.thumbnailFileName,
-                    thumbnailFileURL: imageFileStore.thumbnailURL(fileName: stored.thumbnailFileName)
-                )
+            ingestion.ingest(capture) { item in
+                store.save(item)
+                viewModel?.refresh()
             }
-            store.save(item)
-            Task { @MainActor in viewModel?.refresh() }
         }
         monitor.startMonitoring()
 

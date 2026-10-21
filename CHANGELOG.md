@@ -24,6 +24,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The global shortcut no longer requires Input Monitoring or Accessibility permission.
 - Launch at login is now opt-in instead of always on.
 
+### Fixed
+
+- Copying large images no longer freezes the UI: images are processed off the main thread.
+- Arrow keys, return and escape work while the search field is focused; delete the selected item with `⌘⌫`.
+
 ### Removed
 
 - Unused Apple Events entitlement and usage description.

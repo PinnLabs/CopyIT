@@ -65,6 +65,15 @@ final class PopoverViewModel {
         selectedIndex = min(selectedIndex, max(0, filteredItems.count - 1))
     }
 
+    /// Clears a non-empty search first; returns `true` when the popover should close.
+    func handleEscape() -> Bool {
+        guard searchText.isEmpty else {
+            searchText = ""
+            return false
+        }
+        return true
+    }
+
     func isSelected(_ item: ClipboardItem) -> Bool {
         guard filteredItems.indices.contains(selectedIndex) else { return false }
         return filteredItems[selectedIndex].id == item.id

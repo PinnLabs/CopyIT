@@ -89,4 +89,14 @@ final class PopoverViewModelTests: XCTestCase {
         sut.moveSelection(by: 1)
         XCTAssertTrue(sut.isSelected(b))
     }
+
+    func test_escape_withSearchText_clearsSearchInsteadOfClosing() {
+        sut.searchText = "query"
+        XCTAssertFalse(sut.handleEscape())
+        XCTAssertEqual(sut.searchText, "")
+    }
+
+    func test_escape_withEmptySearch_closes() {
+        XCTAssertTrue(sut.handleEscape())
+    }
 }
