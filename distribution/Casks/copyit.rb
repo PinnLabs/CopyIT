@@ -1,6 +1,6 @@
 cask "copyit" do
-  version "1.1.0"
-  sha256 "a8ab1947239a7fcdcdb8696d2d70b1b8b7906340df4094acef5ad985b84aff08"
+  version "1.2.1"
+  sha256 "8a96b9751e23f3df833475db8523f485fe2481a3e96c3b315337653607c163d1"
 
   url "https://github.com/PinnLabs/CopyIT/releases/download/v#{version}/CopyIT-#{version}.zip"
   name "CopyIT"
