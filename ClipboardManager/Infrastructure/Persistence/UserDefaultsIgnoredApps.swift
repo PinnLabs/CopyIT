@@ -18,10 +18,17 @@ final class UserDefaultsIgnoredApps: IgnoredAppsProviding {
 
     var bundleIdentifiers: [String] {
         get { defaults.stringArray(forKey: Self.storageKey) ?? Self.defaultBundleIdentifiers }
-        set { defaults.set(newValue, forKey: Self.storageKey) }
+        set {
+            var seen = Set<String>()
+            defaults.set(newValue.filter { seen.insert($0).inserted }, forKey: Self.storageKey)
+        }
     }
 
     func isIgnored(bundleIdentifier: String) -> Bool {
         bundleIdentifiers.contains(bundleIdentifier)
+    }
+
+    func restoreDefaults() {
+        defaults.removeObject(forKey: Self.storageKey)
     }
 }
