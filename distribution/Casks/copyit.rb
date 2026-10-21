@@ -15,6 +15,7 @@ cask "copyit" do
     "~/Library/Preferences/com.copyit.ClipboardManager.plist",
     "~/Library/Caches/com.copyit.ClipboardManager",
     "~/Library/Application Support/com.copyit.ClipboardManager",
+    "~/Library/Application Support/CopyIT",
     "~/Library/HTTPStorages/com.copyit.ClipboardManager",
   ]
 end
