@@ -1,5 +1,5 @@
-import XCTest
 @testable import ClipboardManager
+import XCTest
 
 @MainActor
 final class SettingsViewModelTests: XCTestCase {
@@ -27,7 +27,7 @@ final class SettingsViewModelTests: XCTestCase {
     }
 
     func test_changingHistoryLimit_savesAndTrimsHistory() {
-        store.savedItems = (0..<30).map { ClipboardItem(content: "item-\($0)", type: .text) }
+        store.savedItems = (0 ..< 30).map { ClipboardItem(content: "item-\($0)", type: .text) }
         sut.historyLimit = 25
         XCTAssertEqual(preferences.historyLimit, 25)
         XCTAssertEqual(store.savedItems.count, 25)

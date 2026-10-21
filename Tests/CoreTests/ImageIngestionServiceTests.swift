@@ -1,6 +1,6 @@
-import XCTest
 import AppKit
 @testable import ClipboardManager
+import XCTest
 
 @MainActor
 final class ImageIngestionServiceTests: XCTestCase {
@@ -34,10 +34,10 @@ final class ImageIngestionServiceTests: XCTestCase {
         let expectation = expectation(description: "all items delivered")
         expectation.expectedFulfillmentCount = 3
         var delivered: [ClipboardItem] = []
-        let captures: [ClipboardCapture] = [
-            .image(data: try makePNG(red: 0.2), pasteboardType: "public.png"),
+        let captures: [ClipboardCapture] = try [
+            .image(data: makePNG(red: 0.2), pasteboardType: "public.png"),
             .text("between"),
-            .image(data: try makePNG(red: 0.8), pasteboardType: "public.png")
+            .image(data: makePNG(red: 0.8), pasteboardType: "public.png")
         ]
         for capture in captures {
             sut.ingest(capture) { item in

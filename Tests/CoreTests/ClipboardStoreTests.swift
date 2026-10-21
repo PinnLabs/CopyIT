@@ -1,6 +1,6 @@
-import XCTest
 import AppKit
 @testable import ClipboardManager
+import XCTest
 
 final class ClipboardStoreTests: XCTestCase {
     private var defaults: UserDefaults!
@@ -55,7 +55,7 @@ final class ClipboardStoreTests: XCTestCase {
         XCTAssertEqual(sut.fetchAll().count, 1)
     }
 
-    func test_saveAndFetch_persistsImageOutsideUserDefaults() {
+    func test_saveAndFetch_persistsImageOutsideUserDefaults() throws {
         let data = Data([1, 2, 3, 4])
         let item = makeStoredImage(data: data)
 
@@ -66,7 +66,8 @@ final class ClipboardStoreTests: XCTestCase {
         XCTAssertEqual(savedItem?.type, .image)
         XCTAssertNotNil(savedItem?.imageFileName)
         XCTAssertEqual(savedItem?.imageFileName.flatMap(imageFileStore.load), data)
-        XCTAssertFalse(String(data: defaults.data(forKey: "com.copyit.clipboard.history")!, encoding: .utf8)!.contains("AQIDBA=="))
+        XCTAssertFalse(try XCTUnwrap(try String(data: XCTUnwrap(defaults.data(forKey: "com.copyit.clipboard.history")), encoding: .utf8)?
+                .contains("AQIDBA==")))
     }
 
     func test_save_dedupesImagesByDataInsteadOfDisplayLabel() {
@@ -119,8 +120,8 @@ final class ClipboardStoreTests: XCTestCase {
             "imageData": legacyData.base64EncodedString(),
             "imagePasteboardType": "public.png"
         ]]
-        defaults.set(
-            try JSONSerialization.data(withJSONObject: legacyJSON),
+        try defaults.set(
+            JSONSerialization.data(withJSONObject: legacyJSON),
             forKey: "com.copyit.clipboard.history"
         )
 
@@ -129,7 +130,7 @@ final class ClipboardStoreTests: XCTestCase {
         XCTAssertNil(migratedItem.legacyImageData)
         XCTAssertEqual(migratedItem.imageFileName.flatMap(imageFileStore.load), legacyData)
         let persistedJSON = try XCTUnwrap(
-            String(data: defaults.data(forKey: "com.copyit.clipboard.history")!, encoding: .utf8)
+            try String(data: XCTUnwrap(defaults.data(forKey: "com.copyit.clipboard.history")), encoding: .utf8)
         )
         XCTAssertFalse(persistedJSON.contains("BQYH"))
     }
@@ -140,7 +141,7 @@ final class ClipboardStoreTests: XCTestCase {
             imageFileStore: imageFileStore,
             preferences: MockPreferences(historyLimit: 25)
         )
-        for index in 0..<30 {
+        for index in 0 ..< 30 {
             sut.save(ClipboardItem(content: "item-\(index)", type: .text))
         }
         XCTAssertEqual(sut.fetchAll().count, 25)
@@ -154,7 +155,7 @@ final class ClipboardStoreTests: XCTestCase {
         sut = UserDefaultsStore(defaults: defaults, imageFileStore: imageFileStore, preferences: preferences)
         let oldImage = makeStoredImage(data: Data([0x89, 0x50, 0x4E, 0x47, 0x01]))
         sut.save(oldImage)
-        for index in 0..<25 {
+        for index in 0 ..< 25 {
             sut.save(ClipboardItem(content: "item-\(index)", type: .text))
         }
         let imageFileName = try XCTUnwrap(oldImage.imageFileName)

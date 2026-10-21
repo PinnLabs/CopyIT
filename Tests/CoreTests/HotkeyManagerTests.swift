@@ -1,6 +1,6 @@
-import XCTest
 import Carbon.HIToolbox
 @testable import ClipboardManager
+import XCTest
 
 final class HotkeyManagerTests: XCTestCase {
     func test_mockHotkey_invokesCallbackOnTrigger() {

@@ -31,7 +31,7 @@ final class SettingsViewModel {
         self.preferences = preferences
         self.launchAtLogin = launchAtLogin
         self.applyHistoryLimitUseCase = applyHistoryLimitUseCase
-        self.historyLimit = preferences.historyLimit
+        historyLimit = preferences.historyLimit
         refresh()
     }
 

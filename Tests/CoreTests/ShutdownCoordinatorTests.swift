@@ -1,5 +1,5 @@
-import XCTest
 @testable import ClipboardManager
+import XCTest
 
 final class ShutdownCoordinatorTests: XCTestCase {
     private var defaults: UserDefaults!

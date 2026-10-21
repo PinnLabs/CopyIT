@@ -21,6 +21,7 @@ final class PrivacySettingsViewModel {
             pruneExpiredItemsUseCase.execute()
         }
     }
+
     var clearsHistoryOnQuit: Bool {
         didSet { preferences.clearsHistoryOnQuit = clearsHistoryOnQuit }
     }
@@ -37,11 +38,11 @@ final class PrivacySettingsViewModel {
         pruneExpiredItemsUseCase: PruneExpiredItemsUseCase
     ) {
         self.preferences = preferences
-        self.ignoredAppsProvider = ignoredApps
+        ignoredAppsProvider = ignoredApps
         self.appInfo = appInfo
         self.pruneExpiredItemsUseCase = pruneExpiredItemsUseCase
-        self.retention = preferences.retention
-        self.clearsHistoryOnQuit = preferences.clearsHistoryOnQuit
+        retention = preferences.retention
+        clearsHistoryOnQuit = preferences.clearsHistoryOnQuit
         reloadIgnoredApps()
     }
 

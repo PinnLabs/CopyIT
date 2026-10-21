@@ -9,9 +9,9 @@ struct ClipboardItem: Identifiable, Codable, Equatable {
     let imageFileName: String?
     let imageDigest: String?
     let thumbnailFileName: String?
-    // Resolved by the store for presentation and never JSON-encoded.
+    /// Resolved by the store for presentation and never JSON-encoded.
     let thumbnailFileURL: URL?
-    // Decoded only from the short-lived legacy format for one-time migration.
+    /// Decoded only from the short-lived legacy format for one-time migration.
     let legacyImageData: Data?
 
     init(

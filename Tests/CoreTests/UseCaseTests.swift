@@ -1,6 +1,6 @@
-import XCTest
 import AppKit
 @testable import ClipboardManager
+import XCTest
 
 final class UseCaseTests: XCTestCase {
     private var store: MockClipboardStore!

@@ -36,7 +36,9 @@ struct PopoverView: View {
             return .handled
         }
         .onKeyPress(.escape) {
-            if viewModel.handleEscape() { onClose() }
+            if viewModel.handleEscape() {
+                onClose()
+            }
             return .handled
         }
         .background(deleteSelectedShortcut)

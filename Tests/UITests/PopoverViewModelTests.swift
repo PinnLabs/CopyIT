@@ -1,5 +1,5 @@
-import XCTest
 @testable import ClipboardManager
+import XCTest
 
 @MainActor
 final class PopoverViewModelTests: XCTestCase {

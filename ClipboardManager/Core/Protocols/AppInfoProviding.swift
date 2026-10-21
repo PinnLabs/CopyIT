@@ -12,7 +12,9 @@ struct WorkspaceAppInfo: AppInfoProviding {
         }
         var name = FileManager.default.displayName(atPath: url.path)
         // displayName keeps ".app" when the user shows all file extensions in Finder.
-        if name.hasSuffix(".app") { name = String(name.dropLast(4)) }
+        if name.hasSuffix(".app") {
+            name = String(name.dropLast(4))
+        }
         return (name, NSWorkspace.shared.icon(forFile: url.path))
     }
 }

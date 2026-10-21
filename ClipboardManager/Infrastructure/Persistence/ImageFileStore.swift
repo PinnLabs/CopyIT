@@ -3,8 +3,8 @@ import Foundation
 import ImageIO
 import UniformTypeIdentifiers
 
-// @unchecked is safe: all stored properties are immutable `let`s, and FileManager is thread-safe,
-// so the store can be used from the ingestion queue and the main thread at the same time.
+/// @unchecked is safe: all stored properties are immutable `let`s, and FileManager is thread-safe,
+/// so the store can be used from the ingestion queue and the main thread at the same time.
 final class ImageFileStore: @unchecked Sendable {
     struct StoredImage {
         let digest: String
@@ -12,8 +12,8 @@ final class ImageFileStore: @unchecked Sendable {
         let thumbnailFileName: String?
     }
 
-    static let maxItemBytes = 10 * 1_024 * 1_024
-    static let maxTotalBytes = 100 * 1_024 * 1_024
+    static let maxItemBytes = 10 * 1024 * 1024
+    static let maxTotalBytes = 100 * 1024 * 1024
 
     private let fileManager: FileManager
     private let directoryURL: URL
@@ -27,8 +27,7 @@ final class ImageFileStore: @unchecked Sendable {
     }
 
     func store(data: Data, pasteboardType: String) -> StoredImage? {
-        guard !data.isEmpty, data.count <= Self.maxItemBytes else { return nil }
-        guard ensureDirectoryExists() else { return nil }
+        guard !data.isEmpty, data.count <= Self.maxItemBytes, ensureDirectoryExists() else { return nil }
 
         let digest = digest(for: data)
         let fileExtension = UTType(pasteboardType)?.preferredFilenameExtension ?? "data"

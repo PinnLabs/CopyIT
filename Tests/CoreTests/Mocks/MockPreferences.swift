@@ -1,5 +1,5 @@
-import Foundation
 @testable import ClipboardManager
+import Foundation
 
 final class MockPreferences: PreferencesStoring {
     var historyLimit: Int
