@@ -6,10 +6,12 @@ final class StatusBarController: NSObject {
     private let statusItem: NSStatusItem
     private let popover: NSPopover
     private let viewModel: PopoverViewModel
+    private let onOpenSettings: () -> Void
     private var eventMonitor: Any?
 
-    init(viewModel: PopoverViewModel) {
+    init(viewModel: PopoverViewModel, onOpenSettings: @escaping () -> Void) {
         self.viewModel = viewModel
+        self.onOpenSettings = onOpenSettings
         self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         self.popover = NSPopover()
         super.init()
@@ -35,6 +37,7 @@ final class StatusBarController: NSObject {
             rootView: PopoverView(
                 viewModel: viewModel,
                 onQuit: { NSApp.terminate(nil) },
+                onOpenSettings: { [weak self] in self?.menuSettings() },
                 onClose: { [weak self] in self?.closePopover() }
             )
         )
@@ -65,6 +68,7 @@ final class StatusBarController: NSObject {
     private func showContextMenu() {
         let menu = NSMenu()
         menu.addItem(withTitle: "Open Clipboard", action: #selector(menuOpen), keyEquivalent: "").target = self
+        menu.addItem(withTitle: "Settings…", action: #selector(menuSettings), keyEquivalent: ",").target = self
         menu.addItem(NSMenuItem.separator())
         menu.addItem(withTitle: "Clear History", action: #selector(menuClear), keyEquivalent: "").target = self
         menu.addItem(NSMenuItem.separator())
@@ -75,6 +79,10 @@ final class StatusBarController: NSObject {
     }
 
     @objc private func menuOpen() { showPopover() }
+    @objc private func menuSettings() {
+        closePopover()
+        onOpenSettings()
+    }
     @objc private func menuClear() { viewModel.clearAll() }
     @objc private func menuQuit() { NSApp.terminate(nil) }
 

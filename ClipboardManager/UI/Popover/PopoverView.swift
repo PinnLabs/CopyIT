@@ -3,6 +3,7 @@ import SwiftUI
 struct PopoverView: View {
     @Bindable var viewModel: PopoverViewModel
     var onQuit: () -> Void = {}
+    var onOpenSettings: () -> Void = {}
     var onClose: () -> Void = {}
 
     var body: some View {
@@ -83,6 +84,13 @@ struct PopoverView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Spacer()
+            Button(action: onOpenSettings) {
+                Image(systemName: "gearshape")
+            }
+            .buttonStyle(.plain)
+            .font(.caption)
+            .help("Settings")
+            .accessibilityLabel("Settings")
             Button("Quit", action: onQuit)
                 .buttonStyle(.plain)
                 .font(.caption)
