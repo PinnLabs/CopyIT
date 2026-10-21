@@ -1,6 +1,6 @@
-import XCTest
 import AppKit
 @testable import ClipboardManager
+import XCTest
 
 final class ClipboardMonitorTests: XCTestCase {
     func test_monitor_canBeStartedAndStopped() {
@@ -64,7 +64,9 @@ final class ClipboardMonitorTests: XCTestCase {
         pasteboard.clearContents()
         pasteboard.declareTypes([.string] + (marker.map { [$0] } ?? []), owner: nil)
         pasteboard.setString(text, forType: .string)
-        if let marker { pasteboard.setData(Data(), forType: marker) }
+        if let marker {
+            pasteboard.setData(Data(), forType: marker)
+        }
     }
 
     func test_concealedText_isIgnored() {

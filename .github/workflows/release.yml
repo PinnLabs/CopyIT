@@ -31,6 +31,14 @@ jobs:
             echo "value=${ref#v}" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Check CHANGELOG entry
+        run: |
+          version="${{ steps.version.outputs.value }}"
+          if ! grep -q "^## \[${version//./\\.}\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no '## [${version}]' section"
+            exit 1
+          fi
+
       - name: Select latest Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
@@ -43,7 +51,7 @@ jobs:
         run: xcodegen generate
 
       - name: Build Release
-        run: make archive zip sha VERSION=${{ steps.version.outputs.value }}
+        run: make archive zip sha VERSION=${{ steps.version.outputs.value }} BUILD=${{ github.run_number }}
 
       - name: Read SHA256
         id: sha

@@ -1,0 +1,37 @@
+# Mirrors the conventions in CONTRIBUTING.md.
+included:
+  - ClipboardManager
+  - Tests
+excluded:
+  - build
+  - ClipboardManager.xcodeproj
+
+opt_in_rules:
+  - force_unwrapping
+
+force_cast: error
+force_try: error
+force_unwrapping: error
+
+line_length:
+  warning: 140
+  ignores_comments: false
+  ignores_urls: true
+
+# Warning at 30 / error at 50 so existing longer functions don't block CI.
+function_body_length:
+  warning: 30
+  error: 50
+
+identifier_name:
+  excluded:
+    - id
+    - ui
+
+custom_rules:
+  final_class:
+    name: "Final classes"
+    regex: '^\s*(?:(?:private|fileprivate|internal|public)\s+)?class\s+[A-Z]'
+    match_kinds: keyword
+    message: "Mark classes `final` unless they are designed for subclassing (CONTRIBUTING.md)."
+    severity: error

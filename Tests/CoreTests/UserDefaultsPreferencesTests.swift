@@ -1,5 +1,5 @@
-import XCTest
 @testable import ClipboardManager
+import XCTest
 
 final class UserDefaultsPreferencesTests: XCTestCase {
     private func makeDefaults() throws -> UserDefaults {
@@ -10,7 +10,7 @@ final class UserDefaultsPreferencesTests: XCTestCase {
     }
 
     func test_historyLimit_defaultsTo50() throws {
-        let sut = UserDefaultsPreferences(defaults: try makeDefaults())
+        let sut = try UserDefaultsPreferences(defaults: makeDefaults())
         XCTAssertEqual(sut.historyLimit, 50)
     }
 
@@ -27,7 +27,7 @@ final class UserDefaultsPreferencesTests: XCTestCase {
     }
 
     func test_retentionAndClearOnQuit_haveDefaults() throws {
-        let sut = UserDefaultsPreferences(defaults: try makeDefaults())
+        let sut = try UserDefaultsPreferences(defaults: makeDefaults())
         XCTAssertEqual(sut.retention, .forever)
         XCTAssertFalse(sut.clearsHistoryOnQuit)
     }

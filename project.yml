@@ -15,6 +15,9 @@ settings:
     SWIFT_TREAT_WARNINGS_AS_ERRORS: NO
     ENABLE_USER_SCRIPT_SANDBOXING: YES
     DEAD_CODE_STRIPPING: YES
+    # Release builds override both from the tag: make archive VERSION=x.y.z BUILD=n
+    MARKETING_VERSION: "1.1.0"
+    CURRENT_PROJECT_VERSION: "2"
 
 targets:
   ClipboardManager:
@@ -31,8 +34,8 @@ targets:
       properties:
         LSUIElement: true
         LSMinimumSystemVersion: "14.0"
-        CFBundleShortVersionString: "1.1.0"
-        CFBundleVersion: "2"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         NSHumanReadableCopyright: "Copyright © 2026 CopyIT. MIT License."
     settings:
       base:

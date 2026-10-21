@@ -102,11 +102,11 @@ struct PrivacySettingsView: View {
 private extension HistoryRetention {
     var title: String {
         switch self {
-        case .forever: return "Never"
-        case .oneDay: return "1 day"
-        case .sevenDays: return "7 days"
-        case .thirtyDays: return "30 days"
-        case .ninetyDays: return "90 days"
+        case .forever: "Never"
+        case .oneDay: "1 day"
+        case .sevenDays: "7 days"
+        case .thirtyDays: "30 days"
+        case .ninetyDays: "90 days"
         }
     }
 }

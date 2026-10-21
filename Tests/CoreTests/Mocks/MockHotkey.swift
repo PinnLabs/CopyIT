@@ -1,15 +1,22 @@
-import Foundation
 @testable import ClipboardManager
+import Foundation
 
 final class MockHotkey: HotkeyRegistering {
     var onHotkeyTriggered: (() -> Void)?
     private(set) var registerCalls = 0
     private(set) var unregisterCalls = 0
 
-    func register() { registerCalls += 1 }
-    func unregister() { unregisterCalls += 1 }
+    func register() {
+        registerCalls += 1
+    }
 
-    func trigger() { onHotkeyTriggered?() }
+    func unregister() {
+        unregisterCalls += 1
+    }
+
+    func trigger() {
+        onHotkeyTriggered?()
+    }
 }
 
 final class MockLaunchAtLogin: LaunchAtLoginManaging {
@@ -23,15 +30,21 @@ final class MockLaunchAtLogin: LaunchAtLoginManaging {
 
     func enable() throws {
         enableCalls += 1
-        if let error = enableError { throw error }
+        if let error = enableError {
+            throw error
+        }
         isEnabled = true
     }
 
     func disable() throws {
         disableCalls += 1
-        if let error = disableError { throw error }
+        if let error = disableError {
+            throw error
+        }
         isEnabled = false
     }
 
-    func openSystemSettings() { openSystemSettingsCalls += 1 }
+    func openSystemSettings() {
+        openSystemSettingsCalls += 1
+    }
 }

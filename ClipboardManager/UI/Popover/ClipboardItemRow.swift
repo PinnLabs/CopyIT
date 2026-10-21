@@ -60,17 +60,21 @@ struct ClipboardItemRow: View {
     }
 
     private var backgroundColor: Color {
-        if isSelected { return Color.accentColor.opacity(0.22) }
-        if isHovering { return Color.accentColor.opacity(0.12) }
+        if isSelected {
+            return Color.accentColor.opacity(0.22)
+        }
+        if isHovering {
+            return Color.accentColor.opacity(0.12)
+        }
         return .clear
     }
 
     private var iconName: String {
         switch item.type {
-        case .text: return "doc.text"
-        case .url: return "link"
-        case .image: return "photo"
-        case .unknown: return "questionmark.square"
+        case .text: "doc.text"
+        case .url: "link"
+        case .image: "photo"
+        case .unknown: "questionmark.square"
         }
     }
 }

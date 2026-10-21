@@ -25,8 +25,8 @@ final class StatusBarController: NSObject {
         self.monitor = monitor
         self.onOpenSettings = onOpenSettings
         self.onWillShowPopover = onWillShowPopover
-        self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        self.popover = NSPopover()
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        popover = NSPopover()
         super.init()
         configurePopover()
         configureStatusItem()
@@ -39,7 +39,11 @@ final class StatusBarController: NSObject {
     }
 
     func togglePopover() {
-        popover.isShown ? closePopover() : showPopover()
+        if popover.isShown {
+            closePopover()
+        } else {
+            showPopover()
+        }
     }
 
     private func configurePopover() {
@@ -92,13 +96,22 @@ final class StatusBarController: NSObject {
         statusItem.menu = nil
     }
 
-    @objc private func menuOpen() { showPopover() }
+    @objc private func menuOpen() {
+        showPopover()
+    }
+
     @objc private func menuSettings() {
         closePopover()
         onOpenSettings()
     }
-    @objc private func menuClear() { viewModel.clearAll() }
-    @objc private func menuQuit() { NSApp.terminate(nil) }
+
+    @objc private func menuClear() {
+        viewModel.clearAll()
+    }
+
+    @objc private func menuQuit() {
+        NSApp.terminate(nil)
+    }
 
     // MARK: - Pause
 
@@ -117,9 +130,17 @@ final class StatusBarController: NSObject {
         return item
     }
 
-    @objc private func menuPause15Minutes() { pause(for: Self.fifteenMinutes) }
-    @objc private func menuPause1Hour() { pause(for: Self.oneHour) }
-    @objc private func menuPauseIndefinitely() { pause(for: nil) }
+    @objc private func menuPause15Minutes() {
+        pause(for: Self.fifteenMinutes)
+    }
+
+    @objc private func menuPause1Hour() {
+        pause(for: Self.oneHour)
+    }
+
+    @objc private func menuPauseIndefinitely() {
+        pause(for: nil)
+    }
 
     @objc private func menuResume() {
         monitor.resume()

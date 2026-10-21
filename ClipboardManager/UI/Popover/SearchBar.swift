@@ -13,7 +13,9 @@ struct SearchBar: View {
                 .textFieldStyle(.plain)
                 .focused($isFocused)
             if !text.isEmpty {
-                Button(action: { text = "" }) {
+                Button {
+                    text = ""
+                } label: {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundStyle(.secondary)
                 }

@@ -12,11 +12,11 @@ enum HistoryRetention: String, CaseIterable {
     /// `nil` means items never expire.
     var maxAge: TimeInterval? {
         switch self {
-        case .forever: return nil
-        case .oneDay: return Self.secondsPerDay
-        case .sevenDays: return 7 * Self.secondsPerDay
-        case .thirtyDays: return 30 * Self.secondsPerDay
-        case .ninetyDays: return 90 * Self.secondsPerDay
+        case .forever: nil
+        case .oneDay: Self.secondsPerDay
+        case .sevenDays: 7 * Self.secondsPerDay
+        case .thirtyDays: 30 * Self.secondsPerDay
+        case .ninetyDays: 90 * Self.secondsPerDay
         }
     }
 }

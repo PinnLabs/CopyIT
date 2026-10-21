@@ -58,7 +58,9 @@ final class HotkeyManager: HotkeyRegistering {
         eventHandlerRef = nil
     }
 
-    var isRegistered: Bool { hotKeyRef != nil }
+    var isRegistered: Bool {
+        hotKeyRef != nil
+    }
 
     @discardableResult
     func handleHotKeyPressed(id: EventHotKeyID) -> Bool {

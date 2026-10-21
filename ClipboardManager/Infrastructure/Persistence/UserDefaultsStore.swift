@@ -42,8 +42,8 @@ final class UserDefaultsStore: ClipboardStoring {
     }
 
     func fetchAll() -> [ClipboardItem] {
-        guard let data = defaults.data(forKey: Self.storageKey) else { return [] }
-        guard let decoded = try? decoder.decode([ClipboardItem].self, from: data) else { return [] }
+        guard let data = defaults.data(forKey: Self.storageKey),
+              let decoded = try? decoder.decode([ClipboardItem].self, from: data) else { return [] }
 
         var didMigrate = false
         var migrated = decoded.compactMap { item -> ClipboardItem? in

@@ -5,7 +5,7 @@ import UniformTypeIdentifiers
 final class ClipboardMonitor: ClipboardMonitoring {
     var onNewItem: ((ClipboardCapture) -> Void)?
 
-    // Markers from the nspasteboard.org convention that clipboard managers must respect.
+    /// Markers from the nspasteboard.org convention that clipboard managers must respect.
     static let ignoredPasteboardTypes: Set<NSPasteboard.PasteboardType> = [
         NSPasteboard.PasteboardType("org.nspasteboard.ConcealedType"),
         NSPasteboard.PasteboardType("org.nspasteboard.TransientType"),
@@ -35,7 +35,7 @@ final class ClipboardMonitor: ClipboardMonitoring {
         self.ignoredApps = ignoredApps
         self.frontmostApp = frontmostApp
         self.now = now
-        self.lastChangeCount = pasteboard.changeCount
+        lastChangeCount = pasteboard.changeCount
     }
 
     deinit { stopMonitoring() }
@@ -53,7 +53,9 @@ final class ClipboardMonitor: ClipboardMonitoring {
     }
 
     var isPaused: Bool {
-        if isPausedIndefinitely { return true }
+        if isPausedIndefinitely {
+            return true
+        }
         guard let pausedUntil else { return false }
         return now() < pausedUntil
     }

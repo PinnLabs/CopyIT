@@ -21,6 +21,11 @@ Or via Makefile: `make setup`.
 | Run | `make run` | `⌘R` |
 | Unit tests | `make test` | `⌘U` |
 | Clean | `make clean` | `⇧⌘K` |
+| Lint (SwiftLint + SwiftFormat, strict) | `make lint` | — |
+| Format | `make format` | — |
+| Regenerate icons from `brand/` SVGs | `make icons` | — |
+
+`make lint` and `make format` need `brew install swiftlint swiftformat`; CI runs `make lint` on every PR.
 
 ## Architecture
 

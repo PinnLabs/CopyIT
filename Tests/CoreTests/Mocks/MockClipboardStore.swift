@@ -1,5 +1,5 @@
-import Foundation
 @testable import ClipboardManager
+import Foundation
 
 final class MockClipboardStore: ClipboardStoring {
     var savedItems: [ClipboardItem] = []

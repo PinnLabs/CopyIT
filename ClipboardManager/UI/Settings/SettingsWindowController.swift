@@ -19,7 +19,9 @@ final class SettingsWindowController: NSWindowController {
     }
 
     @available(*, unavailable)
-    required init?(coder: NSCoder) { nil }
+    required init?(coder: NSCoder) {
+        nil
+    }
 
     func show() {
         guard let window else { return }

@@ -1,5 +1,5 @@
-import XCTest
 @testable import ClipboardManager
+import XCTest
 
 final class UserDefaultsIgnoredAppsTests: XCTestCase {
     private func makeDefaults() -> UserDefaults {

@@ -24,9 +24,9 @@ final class ImageIngestionService: ClipboardIngesting, Sendable {
 
     private static func makeItem(from capture: ClipboardCapture, imageFileStore: ImageFileStore) -> ClipboardItem? {
         switch capture {
-        case .text(let raw):
+        case let .text(raw):
             return ClipboardItem.from(pasteboardString: raw)
-        case .image(let data, let pasteboardType):
+        case let .image(data, pasteboardType):
             guard isDecodableImage(data),
                   let stored = imageFileStore.store(data: data, pasteboardType: pasteboardType) else {
                 AppLogger.store.warning("Skipped clipboard image that couldn't be decoded or stored")
