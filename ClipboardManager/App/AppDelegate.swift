@@ -10,6 +10,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var launchAtLogin: LaunchAtLoginManaging?
     private var settingsWindow: SettingsWindowController?
     private var pruneTimer: Timer?
+    private var shutdownCoordinator: ShutdownCoordinator?
 
     private static let pruneInterval: TimeInterval = 60 * 60
 
@@ -20,6 +21,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let monitor: ClipboardMonitoring = ClipboardMonitor()
         let hotkey: HotkeyRegistering = HotkeyManager()
         let launchAtLogin: LaunchAtLoginManaging = LaunchAtLoginService()
+        let shutdownCoordinator = ShutdownCoordinator(
+            preferences: preferences,
+            clearHistoryUseCase: ClearHistoryUseCase(store: store)
+        )
+        shutdownCoordinator.handleLaunch()
         let pruneExpiredItems = PruneExpiredItemsUseCase(store: store, preferences: preferences)
         pruneExpiredItems.execute()
 
@@ -86,6 +92,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         self.statusBar = statusBar
         self.launchAtLogin = launchAtLogin
         self.settingsWindow = settingsWindow
+        self.shutdownCoordinator = shutdownCoordinator
     }
 
     func openSettings() {
@@ -97,5 +104,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         pruneTimer = nil
         monitor?.stopMonitoring()
         hotkey?.unregister()
+        shutdownCoordinator?.handleTerminate()
     }
 }
