@@ -134,11 +134,39 @@ final class ClipboardStoreTests: XCTestCase {
         XCTAssertFalse(persistedJSON.contains("BQYH"))
     }
 
-    func test_save_capsAt50Items() {
-        for index in 0..<60 {
+    func test_save_capsAtPreferencesHistoryLimit() {
+        sut = UserDefaultsStore(
+            defaults: defaults,
+            imageFileStore: imageFileStore,
+            preferences: MockPreferences(historyLimit: 25)
+        )
+        for index in 0..<30 {
             sut.save(ClipboardItem(content: "item-\(index)", type: .text))
         }
-        XCTAssertEqual(sut.fetchAll().count, UserDefaultsStore.maxHistoryCount)
+        XCTAssertEqual(sut.fetchAll().count, 25)
+        XCTAssertEqual(sut.fetchAll().first?.content, "item-29")
+    }
+
+    // MARK: - ApplyHistoryLimitUseCase
+
+    func test_applyHistoryLimit_trimsToNewLimitAndDeletesRemovedImages() throws {
+        let preferences = MockPreferences(historyLimit: 50)
+        sut = UserDefaultsStore(defaults: defaults, imageFileStore: imageFileStore, preferences: preferences)
+        let oldImage = makeStoredImage(data: Data([0x89, 0x50, 0x4E, 0x47, 0x01]))
+        sut.save(oldImage)
+        for index in 0..<25 {
+            sut.save(ClipboardItem(content: "item-\(index)", type: .text))
+        }
+        let imageFileName = try XCTUnwrap(oldImage.imageFileName)
+        XCTAssertNotNil(imageFileStore.load(fileName: imageFileName))
+
+        preferences.historyLimit = 25
+        ApplyHistoryLimitUseCase(store: sut, preferences: preferences).execute()
+
+        let items = sut.fetchAll()
+        XCTAssertEqual(items.count, 25)
+        XCTAssertFalse(items.contains { $0.id == oldImage.id })
+        XCTAssertNil(imageFileStore.load(fileName: imageFileName))
     }
 
     private func makeStoredImage(data: Data) -> ClipboardItem {

@@ -7,15 +7,21 @@ final class StatusBarController: NSObject {
     private let popover: NSPopover
     private let viewModel: PopoverViewModel
     private let monitor: ClipboardMonitoring
+    private let onOpenSettings: () -> Void
     private var eventMonitor: Any?
     private var resumeTimer: Timer?
 
     private static let fifteenMinutes: TimeInterval = 15 * 60
     private static let oneHour: TimeInterval = 60 * 60
 
-    init(viewModel: PopoverViewModel, monitor: ClipboardMonitoring) {
+    init(
+        viewModel: PopoverViewModel,
+        monitor: ClipboardMonitoring,
+        onOpenSettings: @escaping () -> Void
+    ) {
         self.viewModel = viewModel
         self.monitor = monitor
+        self.onOpenSettings = onOpenSettings
         self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         self.popover = NSPopover()
         super.init()
@@ -41,6 +47,7 @@ final class StatusBarController: NSObject {
             rootView: PopoverView(
                 viewModel: viewModel,
                 onQuit: { NSApp.terminate(nil) },
+                onOpenSettings: { [weak self] in self?.menuSettings() },
                 onClose: { [weak self] in self?.closePopover() }
             )
         )
@@ -71,6 +78,7 @@ final class StatusBarController: NSObject {
     private func showContextMenu() {
         let menu = NSMenu()
         menu.addItem(withTitle: "Open Clipboard", action: #selector(menuOpen), keyEquivalent: "").target = self
+        menu.addItem(withTitle: "Settings…", action: #selector(menuSettings), keyEquivalent: ",").target = self
         menu.addItem(NSMenuItem.separator())
         menu.addItem(withTitle: "Clear History", action: #selector(menuClear), keyEquivalent: "").target = self
         menu.addItem(makePauseMenuItem())
@@ -82,6 +90,10 @@ final class StatusBarController: NSObject {
     }
 
     @objc private func menuOpen() { showPopover() }
+    @objc private func menuSettings() {
+        closePopover()
+        onOpenSettings()
+    }
     @objc private func menuClear() { viewModel.clearAll() }
     @objc private func menuQuit() { NSApp.terminate(nil) }
 

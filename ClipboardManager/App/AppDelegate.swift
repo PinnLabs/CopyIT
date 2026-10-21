@@ -8,10 +8,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var hotkey: HotkeyRegistering?
     private var store: ClipboardStoring?
     private var launchAtLogin: LaunchAtLoginManaging?
+    private var settingsWindow: SettingsWindowController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let imageFileStore = ImageFileStore()
-        let store: ClipboardStoring = UserDefaultsStore(imageFileStore: imageFileStore)
+        let preferences: PreferencesStoring = UserDefaultsPreferences()
+        let store: ClipboardStoring = UserDefaultsStore(imageFileStore: imageFileStore, preferences: preferences)
         let monitor: ClipboardMonitoring = ClipboardMonitor()
         let hotkey: HotkeyRegistering = HotkeyManager()
         let launchAtLogin: LaunchAtLoginManaging = LaunchAtLoginService()
@@ -23,7 +25,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             clearUseCase: ClearHistoryUseCase(store: store)
         )
 
-        let statusBar = StatusBarController(viewModel: viewModel, monitor: monitor)
+        let settingsWindow = SettingsWindowController(
+            viewModel: SettingsViewModel(
+                preferences: preferences,
+                launchAtLogin: launchAtLogin,
+                applyHistoryLimitUseCase: ApplyHistoryLimitUseCase(store: store, preferences: preferences)
+            )
+        )
+        let statusBar = StatusBarController(viewModel: viewModel, monitor: monitor) { [weak settingsWindow] in
+            settingsWindow?.show()
+        }
 
         monitor.onNewItem = { [weak viewModel] capture in
             let item: ClipboardItem
@@ -55,17 +66,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         hotkey.register()
 
-        do {
-            try launchAtLogin.enable()
-        } catch {
-            AppLogger.launchAtLogin.error("Failed to register: \(error.localizedDescription, privacy: .public)")
-        }
-
+        // Launch at login is opt-in from Settings. Existing users stay registered: SMAppService keeps the
+        // registration across launches, and nothing here calls disable().
         self.store = store
         self.monitor = monitor
         self.hotkey = hotkey
         self.statusBar = statusBar
         self.launchAtLogin = launchAtLogin
+        self.settingsWindow = settingsWindow
+    }
+
+    func openSettings() {
+        settingsWindow?.show()
     }
 
     func applicationWillTerminate(_ notification: Notification) {

@@ -2,19 +2,21 @@ import Foundation
 
 final class UserDefaultsStore: ClipboardStoring {
     private static let storageKey = "com.copyit.clipboard.history"
-    static let maxHistoryCount = 50
 
     private let defaults: UserDefaults
     private let imageFileStore: ImageFileStore
+    private let preferences: PreferencesStoring
     private let decoder = JSONDecoder()
     private let encoder = JSONEncoder()
 
     init(
         defaults: UserDefaults = .standard,
-        imageFileStore: ImageFileStore = ImageFileStore()
+        imageFileStore: ImageFileStore = ImageFileStore(),
+        preferences: PreferencesStoring? = nil
     ) {
         self.defaults = defaults
         self.imageFileStore = imageFileStore
+        self.preferences = preferences ?? UserDefaultsPreferences(defaults: defaults)
     }
 
     func save(_ item: ClipboardItem) {
@@ -29,11 +31,12 @@ final class UserDefaultsStore: ClipboardStoring {
         current.insert(item, at: 0)
         enforceImageBudget(in: &current)
 
-        if current.count > Self.maxHistoryCount {
-            for removedItem in current.dropFirst(Self.maxHistoryCount) {
+        let limit = preferences.historyLimit
+        if current.count > limit {
+            for removedItem in current.dropFirst(limit) {
                 deleteImageFiles(for: removedItem)
             }
-            current = Array(current.prefix(Self.maxHistoryCount))
+            current = Array(current.prefix(limit))
         }
         persist(current)
     }
