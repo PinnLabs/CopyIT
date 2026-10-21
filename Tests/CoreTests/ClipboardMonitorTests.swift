@@ -36,4 +36,139 @@ final class ClipboardMonitorTests: XCTestCase {
             .image(data: data, pasteboardType: NSPasteboard.PasteboardType.png.rawValue)
         )
     }
+
+    // MARK: - Ignored pasteboard types
+
+    private let concealed = NSPasteboard.PasteboardType("org.nspasteboard.ConcealedType")
+    private let transient = NSPasteboard.PasteboardType("org.nspasteboard.TransientType")
+
+    private func makeSUT(
+        frontmost: String? = nil,
+        ignored: [String] = [],
+        now: @escaping () -> Date = Date.init
+    ) -> (ClipboardMonitor, NSPasteboard, () -> [ClipboardCapture]) {
+        let pasteboard = NSPasteboard.withUniqueName()
+        addTeardownBlock { pasteboard.releaseGlobally() }
+        let sut = ClipboardMonitor(
+            pasteboard: pasteboard,
+            ignoredApps: MockIgnoredApps(bundleIdentifiers: ignored),
+            frontmostApp: MockFrontmostApp(frontmostBundleIdentifier: frontmost),
+            now: now
+        )
+        var captures: [ClipboardCapture] = []
+        sut.onNewItem = { captures.append($0) }
+        return (sut, pasteboard, { captures })
+    }
+
+    private func write(_ text: String, markedAs marker: NSPasteboard.PasteboardType?, to pasteboard: NSPasteboard) {
+        pasteboard.clearContents()
+        pasteboard.declareTypes([.string] + (marker.map { [$0] } ?? []), owner: nil)
+        pasteboard.setString(text, forType: .string)
+        if let marker { pasteboard.setData(Data(), forType: marker) }
+    }
+
+    func test_concealedText_isIgnored() {
+        let (sut, pasteboard, captures) = makeSUT()
+        write("secret", markedAs: concealed, to: pasteboard)
+        sut.checkForClipboardChanges()
+        XCTAssertTrue(captures().isEmpty)
+    }
+
+    func test_transientText_isIgnored() {
+        let (sut, pasteboard, captures) = makeSUT()
+        write("temp", markedAs: transient, to: pasteboard)
+        sut.checkForClipboardChanges()
+        XCTAssertTrue(captures().isEmpty)
+    }
+
+    func test_concealedImage_isIgnored() {
+        let (sut, pasteboard, captures) = makeSUT()
+        pasteboard.clearContents()
+        pasteboard.declareTypes([.png, concealed], owner: nil)
+        pasteboard.setData(Data([0x89, 0x50, 0x4E, 0x47]), forType: .png)
+        pasteboard.setData(Data(), forType: concealed)
+        sut.checkForClipboardChanges()
+        XCTAssertTrue(captures().isEmpty)
+    }
+
+    func test_plainText_isCaptured() {
+        let (sut, pasteboard, captures) = makeSUT()
+        write("hello", markedAs: nil, to: pasteboard)
+        sut.checkForClipboardChanges()
+        XCTAssertEqual(captures(), [.text("hello")])
+    }
+
+    func test_plainTextAfterIgnoredItem_isCaptured() {
+        let (sut, pasteboard, captures) = makeSUT()
+        write("secret", markedAs: concealed, to: pasteboard)
+        sut.checkForClipboardChanges()
+        write("hello", markedAs: nil, to: pasteboard)
+        sut.checkForClipboardChanges()
+        XCTAssertEqual(captures(), [.text("hello")])
+    }
+
+    // MARK: - Ignored apps
+
+    func test_itemFromIgnoredApp_isIgnored() {
+        let (sut, pasteboard, captures) = makeSUT(frontmost: "com.bitwarden.desktop", ignored: ["com.bitwarden.desktop"])
+        write("secret", markedAs: nil, to: pasteboard)
+        sut.checkForClipboardChanges()
+        XCTAssertTrue(captures().isEmpty)
+    }
+
+    func test_itemFromNonIgnoredApp_isCaptured() {
+        let (sut, pasteboard, captures) = makeSUT(frontmost: "com.apple.Safari", ignored: ["com.bitwarden.desktop"])
+        write("hello", markedAs: nil, to: pasteboard)
+        sut.checkForClipboardChanges()
+        XCTAssertEqual(captures(), [.text("hello")])
+    }
+
+    func test_noFrontmostApp_doesNotBlockCapture() {
+        let (sut, pasteboard, captures) = makeSUT(frontmost: nil, ignored: ["com.bitwarden.desktop"])
+        write("hello", markedAs: nil, to: pasteboard)
+        sut.checkForClipboardChanges()
+        XCTAssertEqual(captures(), [.text("hello")])
+    }
+
+    // MARK: - Pause
+
+    func test_whilePaused_itemIsIgnored() {
+        let (sut, pasteboard, captures) = makeSUT()
+        sut.pause(until: nil)
+        write("hello", markedAs: nil, to: pasteboard)
+        sut.checkForClipboardChanges()
+        XCTAssertTrue(sut.isPaused)
+        XCTAssertTrue(captures().isEmpty)
+    }
+
+    func test_pauseUntilDate_expiresAndCapturesNextItem() {
+        var clock = Date(timeIntervalSince1970: 0)
+        let (sut, pasteboard, captures) = makeSUT(now: { clock })
+        sut.pause(until: clock.addingTimeInterval(60))
+        clock = clock.addingTimeInterval(61)
+        write("hello", markedAs: nil, to: pasteboard)
+        sut.checkForClipboardChanges()
+        XCTAssertFalse(sut.isPaused)
+        XCTAssertEqual(captures(), [.text("hello")])
+    }
+
+    func test_itemCopiedWhilePaused_isNotCapturedAfterResume() {
+        let (sut, pasteboard, captures) = makeSUT()
+        sut.pause(until: nil)
+        write("secret", markedAs: nil, to: pasteboard)
+        sut.checkForClipboardChanges()
+        sut.resume()
+        sut.checkForClipboardChanges()
+        XCTAssertTrue(captures().isEmpty)
+    }
+
+    func test_resumeBeforeDeadline_capturesAgain() {
+        let clock = Date(timeIntervalSince1970: 0)
+        let (sut, pasteboard, captures) = makeSUT(now: { clock })
+        sut.pause(until: clock.addingTimeInterval(3600))
+        sut.resume()
+        write("hello", markedAs: nil, to: pasteboard)
+        sut.checkForClipboardChanges()
+        XCTAssertEqual(captures(), [.text("hello")])
+    }
 }

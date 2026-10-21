@@ -20,6 +20,9 @@ Native macOS menu bar clipboard manager. Open source, MIT-licensed.
 - Global hotkey `⌥Space` to toggle the popover from anywhere.
 - Right-click the status bar icon for quick actions (Open, Clear, Quit).
 - Launches at login (`SMAppService`).
+- Skips items that password managers mark as sensitive or temporary (nspasteboard.org markers).
+- Skips anything copied while an ignored app is frontmost (defaults: Keychain Access, Passwords, 1Password, Bitwarden).
+- Pause capture from the menu bar right-click menu (15 minutes, 1 hour, or until resumed).
 - Persists history metadata in `UserDefaults` and image payloads in Application Support.
 
 ## Install

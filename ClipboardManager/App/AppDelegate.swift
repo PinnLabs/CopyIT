@@ -23,7 +23,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             clearUseCase: ClearHistoryUseCase(store: store)
         )
 
-        let statusBar = StatusBarController(viewModel: viewModel)
+        let statusBar = StatusBarController(viewModel: viewModel, monitor: monitor)
 
         monitor.onNewItem = { [weak viewModel] capture in
             let item: ClipboardItem

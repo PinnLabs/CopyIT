@@ -6,10 +6,16 @@ final class StatusBarController: NSObject {
     private let statusItem: NSStatusItem
     private let popover: NSPopover
     private let viewModel: PopoverViewModel
+    private let monitor: ClipboardMonitoring
     private var eventMonitor: Any?
+    private var resumeTimer: Timer?
 
-    init(viewModel: PopoverViewModel) {
+    private static let fifteenMinutes: TimeInterval = 15 * 60
+    private static let oneHour: TimeInterval = 60 * 60
+
+    init(viewModel: PopoverViewModel, monitor: ClipboardMonitoring) {
         self.viewModel = viewModel
+        self.monitor = monitor
         self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         self.popover = NSPopover()
         super.init()
@@ -67,6 +73,7 @@ final class StatusBarController: NSObject {
         menu.addItem(withTitle: "Open Clipboard", action: #selector(menuOpen), keyEquivalent: "").target = self
         menu.addItem(NSMenuItem.separator())
         menu.addItem(withTitle: "Clear History", action: #selector(menuClear), keyEquivalent: "").target = self
+        menu.addItem(makePauseMenuItem())
         menu.addItem(NSMenuItem.separator())
         menu.addItem(withTitle: "Quit ClipboardManager", action: #selector(menuQuit), keyEquivalent: "q").target = self
         statusItem.menu = menu
@@ -77,6 +84,49 @@ final class StatusBarController: NSObject {
     @objc private func menuOpen() { showPopover() }
     @objc private func menuClear() { viewModel.clearAll() }
     @objc private func menuQuit() { NSApp.terminate(nil) }
+
+    // MARK: - Pause
+
+    private func makePauseMenuItem() -> NSMenuItem {
+        if monitor.isPaused {
+            let item = NSMenuItem(title: "Resume Capture", action: #selector(menuResume), keyEquivalent: "")
+            item.target = self
+            return item
+        }
+        let submenu = NSMenu()
+        submenu.addItem(withTitle: "For 15 Minutes", action: #selector(menuPause15Minutes), keyEquivalent: "").target = self
+        submenu.addItem(withTitle: "For 1 Hour", action: #selector(menuPause1Hour), keyEquivalent: "").target = self
+        submenu.addItem(withTitle: "Until Resumed", action: #selector(menuPauseIndefinitely), keyEquivalent: "").target = self
+        let item = NSMenuItem(title: "Pause Capture", action: nil, keyEquivalent: "")
+        item.submenu = submenu
+        return item
+    }
+
+    @objc private func menuPause15Minutes() { pause(for: Self.fifteenMinutes) }
+    @objc private func menuPause1Hour() { pause(for: Self.oneHour) }
+    @objc private func menuPauseIndefinitely() { pause(for: nil) }
+
+    @objc private func menuResume() {
+        monitor.resume()
+        updatePauseAppearance()
+    }
+
+    private func pause(for interval: TimeInterval?) {
+        let deadline = interval.map { Date().addingTimeInterval($0) }
+        monitor.pause(until: deadline)
+        updatePauseAppearance()
+        guard let deadline else { return }
+        // Un-dim the icon when the timed pause expires on its own.
+        resumeTimer = Timer.scheduledTimer(withTimeInterval: deadline.timeIntervalSinceNow, repeats: false) { [weak self] _ in
+            Task { @MainActor in self?.updatePauseAppearance() }
+        }
+    }
+
+    private func updatePauseAppearance() {
+        resumeTimer?.invalidate()
+        resumeTimer = nil
+        statusItem.button?.appearsDisabled = monitor.isPaused
+    }
 
     private func showPopover() {
         guard let button = statusItem.button else { return }
